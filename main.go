@@ -28,6 +28,7 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	}
 	defer conn.Close()
 	read := bufio.NewReader(conn)
+	r.Header.Add("X-HTTP-Science", "1")
 	r.WriteProxy(conn)
 	res, err := http.ReadResponse(read, r)
 	if err != nil {

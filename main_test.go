@@ -32,10 +32,16 @@ type TestCase struct {
 
 func (tc TestCase) Run(t *testing.T) {
 	control := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-HTTP-Science") != "1" {
+			t.Fatalf("Did not have X-HTTP-Science header")
+		}
 		fmt.Fprintln(w, tc.Control.Body)
 	}))
 	defer control.Close()
 	experiment := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-HTTP-Science") != "1" {
+			t.Fatalf("Did not have X-HTTP-Science header")
+		}
 		fmt.Fprintln(w, tc.Experiment.Body)
 	}))
 	defer experiment.Close()
