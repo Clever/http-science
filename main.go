@@ -7,7 +7,11 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	_ "net/http/pprof"
 	"os"
+	"runtime"
+	"runtime/pprof"
+	"time"
 )
 
 // Science is an http.Handler that forwards requests it receives to two places, logging any
@@ -78,12 +82,47 @@ func (s Science) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "OK")
 }
 
+// TODO: Add a nice comment!!!
+// TODO: Note that this never returns :)
+func logMetrics() {
+	for {
+		var memStats runtime.MemStats
+		runtime.ReadMemStats(&memStats)
+		// TODO: Convert these to kayvee format
+		log.Printf("HeapAlloc %d", memStats.HeapAlloc)
+		log.Printf("HeapInuse %d", memStats.HeapInuse)
+		log.Printf("NumGC %d", memStats.NumGC)
+		log.Printf("PauseTotalNs %d", memStats.PauseTotalNs)
+
+		time.Sleep(1 * time.Minute)
+	}
+}
+
+func periodicallyWriteDump() {
+	for {
+		f, err := os.Create("mem.profile")
+		if err != nil {
+			// TODO: Maybe this kayvee format
+			log.Printf("ERROR %v\n", err)
+		}
+		pprof.WriteHeapProfile(f)
+		f.Close()
+		time.Sleep(1 * time.Hour)
+	}
+}
+
 func main() {
 	for _, env := range []string{"CONTROL", "EXPERIMENT"} {
 		if os.Getenv(env) == "" {
 			log.Fatalf("%s required", env)
 		}
 	}
+	go func() {
+		logMetrics()
+	}()
+	go func() {
+		periodicallyWriteDump()
+	}()
 	log.Fatal(http.ListenAndServe(":80", Science{
 		ControlDial:    os.Getenv("CONTROL"),
 		ExperimentDial: os.Getenv("EXPERIMENT"),
