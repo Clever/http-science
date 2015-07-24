@@ -32,7 +32,9 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	}
 	defer conn.Close()
 	read := bufio.NewReader(conn)
-	r.WriteProxy(conn)
+	if err = r.WriteProxy(conn); err != nil {
+		return "", fmt.Errorf("TODO")
+	}
 	res, err := http.ReadResponse(read, r)
 	if err != nil {
 		return "", fmt.Errorf("error reading response from %s: %s", addr, err)
@@ -122,6 +124,9 @@ func main() {
 	}()
 	go func() {
 		periodicallyWriteDump()
+	}()
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 	log.Fatal(http.ListenAndServe(":80", Science{
 		ControlDial:    os.Getenv("CONTROL"),
