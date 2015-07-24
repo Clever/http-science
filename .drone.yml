@@ -19,6 +19,6 @@ publish:
     - $(git rev-parse --short HEAD)
     username: $$docker_username
     when:
-      branch: perf-analysis
+      branch: perf-analysis2
 script:
   - make all
