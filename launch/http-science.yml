@@ -9,4 +9,4 @@ expose:
     bind: 80    # port to bind the reverse proxy to (for the world)
   - name: pprof
     port: 6060
-    port: 6060
+    bind: 6060
