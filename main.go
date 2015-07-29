@@ -28,7 +28,9 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	}
 	defer conn.Close()
 	read := bufio.NewReader(conn)
-	r.WriteProxy(conn)
+	if err = r.WriteProxy(conn); err != nil {
+		return "", fmt.Errorf("error initializing write proxy to %s: %s", addr, err)
+	}
 	res, err := http.ReadResponse(read, r)
 	if err != nil {
 		return "", fmt.Errorf("error reading response from %s: %s", addr, err)
