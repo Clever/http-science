@@ -37,6 +37,7 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	}
 	defer res.Body.Close()
 	delete(res.Header, "Date")
+	delete(res.Header, "Etag")
 	resDump, err := httputil.DumpResponse(res, true)
 	if err != nil {
 		return "", fmt.Errorf("error dumping response from %s: %s", addr, err)
@@ -45,6 +46,19 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 }
 
 func (s Science) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	// See https://en.wikipedia.org/wiki/HTTP_ETag. The tl;dr is that if that
+	// header is sent to a server that has that Etag value then it may return a 304
+	// instead of the actual data, which confuses science. We have two options
+	// 1. Remove this header on all requests
+	// 2. Ignore requests with that header
+	// We decided to go with #2 because #1 might have performance implications. Also
+	// in case #2 the client must have got a successful response before, so Science could
+	// have caught that.
+	if r.Header.Get("If-None-Match") != "" {
+		log.Printf("Skipping request with `If-None-Match` header")	
+		return
+	}
 
 	// save request for potential diff logging
 	reqDump, err := httputil.DumpRequest(r, true)
