@@ -15,6 +15,7 @@ type Request struct {
 	//Method string
 	Path string
 	//Body string
+	Headers map[string]string
 }
 
 type Response struct {
@@ -46,7 +47,15 @@ func (tc TestCase) Run(t *testing.T) {
 		DiffLog:        log.New(&output, "", 0),
 	})
 	defer scienceServer.Close()
-	_, err := http.Get(scienceServer.URL + tc.Request.Path)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", scienceServer.URL + tc.Request.Path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for key, val := range tc.Request.Headers {
+		req.Header.Set(key, val)
+	}
+	_, err = client.Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,9 +82,26 @@ func TestScience(t *testing.T) {
 		TestCase{
 			Control: Response{
 				Body: "Server A",
+				Headers: map[string]string{"Etag" : "A"},
 			},
 			Experiment: Response{
 				Body: "Server A",
+				Headers: map[string]string{"Etag" : "B"},
+			},
+			Output: ``,
+		},
+
+		// ignore If-None-Match
+		TestCase{
+			Control: Response{
+				Body: "Server A",
+			},
+			Experiment: Response{
+				Body: "Server B",
+			},
+			Request: Request{
+				Path: "",
+				Headers: map[string]string{"If-None-Match": "ABC"},
 			},
 			Output: ``,
 		},
