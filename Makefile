@@ -1,13 +1,20 @@
 SHELL := /bin/bash
 PKG = github.com/Clever/http-science
+PKGS := $(shell go list ./... | grep -v /vendor)
 GOLINT := $(GOPATH)/bin/golint
+.PHONY: build all vendor $(PKGS)
+
+GOLINT := $(GOPATH)/bin/golint
+$(GOLINT):
+	go get github.com/golang/lint/golint
+
+GODEP := $(GOPATH)/bin/godep
+$(GODEP):
+	go get -u github.com/tools/godep
 
 test: $(PKG)
 
 all: build test
-
-$(GOLINT):
-	go get github.com/golang/lint/golint
 
 $(PKG): $(GOLINT) $(GODEP)
 	go install $@
@@ -36,14 +43,6 @@ build/linux-amd64: $(GOPATH)/bin/gox
 	GOARCH=amd64 GOOS=linux go build -o "$@/$(EXECUTABLE)" $(PKG)
 
 build: $(BUILDS)
-
-
-SHELL := /bin/bash
-PKGS := $(shell go list ./... | grep -v /vendor)
-GODEP := $(GOPATH)/bin/godep
-
-$(GODEP):
-	go get -u github.com/tools/godep
 
 vendor: $(GODEP)
 	$(GODEP) save $(PKGS)
