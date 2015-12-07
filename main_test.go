@@ -28,6 +28,7 @@ type TestCase struct {
 	Control    Response
 	Experiment Response
 	Output     string
+	Diff       Diff
 }
 
 func (tc TestCase) Run(t *testing.T) {
@@ -40,10 +41,14 @@ func (tc TestCase) Run(t *testing.T) {
 	}))
 	defer experiment.Close()
 	var output bytes.Buffer
+	if tc.Diff == nil {
+		tc.Diff = TextDiff
+	}
 	scienceServer := httptest.NewServer(Science{
 		ControlDial:    strings.Replace(control.URL, "http://", "", -1),
 		ExperimentDial: strings.Replace(experiment.URL, "http://", "", -1),
 		DiffLog:        log.New(&output, "", 0),
+		Diff:           tc.Diff,
 	})
 	defer scienceServer.Close()
 	_, err := http.Get(scienceServer.URL + tc.Request.Path)
@@ -88,13 +93,15 @@ func TestScience(t *testing.T) {
 			Experiment: Response{
 				Body: "Server B",
 			},
-			Output: `=== diff ===
+			Output: `===============
+--- request ---
 GET / HTTP/1.1
 Host: {{.Host}}
 Accept-Encoding: gzip
-User-Agent: Go 1.1 package http
+User-Agent: Go-http-client/1.1
 
 
+---  diff   ---
 ---
 HTTP/1.1 200 OK
 Content-Length: 9
@@ -109,7 +116,33 @@ Content-Type: text/plain; charset=utf-8
 
 Server B
 
-============
+---
+===============
+`,
+		},
+
+		TestCase{
+			Control: Response{
+				Body: `{"a":[1,2,3], "b": "asdf"}`,
+			},
+			Experiment: Response{
+				Body: `{"a":[1,2], "b": "a"}`,
+			},
+			Diff: JSONDiff,
+			Output: `===============
+--- request ---
+GET / HTTP/1.1
+Host: {{.Host}}
+Accept-Encoding: gzip
+User-Agent: Go-http-client/1.1
+
+
+---  diff   ---
+["Content-Length"][0]: "27" != "22"
+["a"]: []interface {}[3] != []interface {}[2]
+["b"]: "asdf" != "a"
+
+===============
 `,
 		},
 	} {

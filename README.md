@@ -23,6 +23,8 @@ Assuming you have two versions of an HTTP service deployed, it takes care of for
 * `CONTROL`: address (`DNS or IP`:`port`) of an http server. Responses will be considered as the "control" in the experiment, i.e. any deviation from the response returned from this server will be treated as significant.
 * `EXPERIMENT`: address of an http server. Responses from this server will be compared to responses to the `CONTROL` server.
 
+Optionally you can specify `DIFF=json` to diff responses as JSON, not text.
+
 Once launched, `http-science` listens for HTTP requests on port 80, and will forward any request it receives to both `CONTROL` and `EXPERIMENT`.
 If there is a difference in responses, it will log a report of the difference.
 
