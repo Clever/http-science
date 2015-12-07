@@ -92,7 +92,7 @@ func TestScience(t *testing.T) {
 GET / HTTP/1.1
 Host: {{.Host}}
 Accept-Encoding: gzip
-User-Agent: Go 1.1 package http
+User-Agent: Go-http-client/1.1
 
 
 ---
