@@ -1,4 +1,4 @@
-image: bradrydzewski/go:1.4
+image: clever/drone-go:1.5
 notify:
   email:
     recipients:
@@ -24,4 +24,5 @@ publish:
     when:
       branch: master
 script:
-  - make all
+- make test
+- make build

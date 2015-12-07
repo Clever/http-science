@@ -1,38 +1,39 @@
 SHELL := /bin/bash
 PKG = github.com/Clever/http-science
+PKGS := $(shell go list ./... | grep -v /vendor)
+EXECUTABLE := http-science
+.PHONY: build all vendor $(PKGS)
+
+all: test build
+
 GOLINT := $(GOPATH)/bin/golint
-
-test: $(PKG)
-
-all: build test
-
 $(GOLINT):
 	go get github.com/golang/lint/golint
 
-$(PKG): $(GOLINT) $(GODEP)
+GODEP := $(GOPATH)/bin/godep
+$(GODEP):
+	go get -u github.com/tools/godep
+
+test: $(PKGS)
+
+$(PKGS): $(GOLINT)
 	go install $@
 	gofmt -w=true $(GOPATH)/src/$@/*.go
 	$(GOLINT) $(GOPATH)/src/$@/*.go
-ifeq ($(COVERAGE),1)
-	go test -cover -coverprofile=$(GOPATH)/src/$@/c.out $@ -test.v
-	go tool cover -html=$(GOPATH)/src/$@/c.out
-else
 	@echo "TESTING $@..."
 	go test -v $@
-endif
 
-EXECUTABLE := http-science
 BUILDS := \
 	build/linux-amd64 \
 	build/darwin-amd64
 
-$(GOPATH)/bin/gox:
-	go get github.com/mitchellh/gox
-build/darwin-amd64: $(GOPATH)/bin/gox
-	sudo PATH=$$PATH:`go env GOROOT`/bin $(GOPATH)/bin/gox -build-toolchain -os darwin -arch amd64
+build/darwin-amd64:
 	GOARCH=amd64 GOOS=darwin go build -o "$@/$(EXECUTABLE)" $(PKG)
-build/linux-amd64: $(GOPATH)/bin/gox
-	sudo PATH=$$PATH:`go env GOROOT`/bin $(GOPATH)/bin/gox -build-toolchain -os linux -arch amd64
+build/linux-amd64:
 	GOARCH=amd64 GOOS=linux go build -o "$@/$(EXECUTABLE)" $(PKG)
 
 build: $(BUILDS)
+
+vendor: $(GODEP)
+	$(GODEP) save $(PKGS)
+	find vendor/ -path '*/vendor' -type d | xargs -IX rm -r X # remove any nested vendor directories

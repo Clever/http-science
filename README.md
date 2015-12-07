@@ -26,9 +26,6 @@ Assuming you have two versions of an HTTP service deployed, it takes care of for
 Once launched, `http-science` listens for HTTP requests on port 80, and will forward any request it receives to both `CONTROL` and `EXPERIMENT`.
 If there is a difference in responses, it will log a report of the difference.
 
+## Vendoring
 
-## Developing
-
-`make test` runs the tests.
-
-`make build` will build binaries for Linux and Mac OS.
+Please view the [dev-handbook for instructions](https://github.com/Clever/dev-handbook/blob/master/golang/godep.md).
