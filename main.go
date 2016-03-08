@@ -37,6 +37,12 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	}
 	defer res.Body.Close()
 	delete(res.Header, "Date")
+	// Remove the Transfer-Encoding and Content-Length headers. We've seen some false positives where the control
+	// returns one and the experiment returns the other, but the return the same actual body. Since we're already
+	// matching the bodies and the way the data is sent over the wire doesn't matter, let's ignore these.
+	delete(res.Header, "Transfer-Encoding")
+	delete(res.Header, "Content-Length")
+
 	resDump, err := httputil.DumpResponse(res, true)
 	if err != nil {
 		return "", fmt.Errorf("error dumping response from %s: %s", addr, err)
