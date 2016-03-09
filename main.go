@@ -55,12 +55,14 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 		return "", fmt.Errorf("error reading response from %s: %s", addr, err)
 	}
 	defer res.Body.Close()
+	fmt.Printf("Res headers before: %+v\n", res.Header)
 	res.Header.Del("Date")
 	// Remove the Transfer-Encoding and Content-Length headers. We've seen some false positives where the control
 	// returns one and the experiment returns the other, but the return the same actual body. Since we're already
 	// matching the bodies and the way the data is sent over the wire doesn't matter, let's ignore these.
 	res.Header.Del("Transfer-Encoding")
 	res.Header.Del("Content-Length")
+	fmt.Printf("Res headers after: %+v\n", res.Header)
 
 	resDump, err := httputil.DumpResponse(res, true)
 	if err != nil {
