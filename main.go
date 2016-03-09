@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -18,6 +20,15 @@ type Science struct {
 	DiffLog        *log.Logger
 }
 
+// TODO: Comment explaning this...
+type myReader struct {
+	*bytes.Buffer
+}
+
+func (m myReader) Close() error {
+	return nil
+}
+
 // forwardRequest forwards a request to an http server and returns the raw HTTP response.
 // It also removes the Date header from the returned response data so you can diff it against other
 // responses.
@@ -31,9 +42,15 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	if err = r.WriteProxy(conn); err != nil {
 		return "", fmt.Errorf("error initializing write proxy to %s: %s", addr, err)
 	}
-	save := r.Body
+	buf, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return "", err
+	}
+	toUse := myReader{bytes.NewBuffer(buf)}
+	toSave := myReader{bytes.NewBuffer(buf)}
+	r.Body = toUse
 	res, err := http.ReadResponse(read, r)
-	r.Body = save
+	r.Body = toSave
 	if err != nil {
 		return "", fmt.Errorf("error reading response from %s: %s", addr, err)
 	}
