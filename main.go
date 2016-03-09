@@ -31,17 +31,19 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	if err = r.WriteProxy(conn); err != nil {
 		return "", fmt.Errorf("error initializing write proxy to %s: %s", addr, err)
 	}
+	save := r.Body
 	res, err := http.ReadResponse(read, r)
+	r.Body = save
 	if err != nil {
 		return "", fmt.Errorf("error reading response from %s: %s", addr, err)
 	}
 	defer res.Body.Close()
-	delete(res.Header, "Date")
+	res.Header.Del("Date")
 	// Remove the Transfer-Encoding and Content-Length headers. We've seen some false positives where the control
 	// returns one and the experiment returns the other, but the return the same actual body. Since we're already
 	// matching the bodies and the way the data is sent over the wire doesn't matter, let's ignore these.
-	delete(res.Header, "Transfer-Encoding")
-	delete(res.Header, "Content-Length")
+	res.Header.Del("Transfer-Encoding")
+	res.Header.Del("Content-Length")
 
 	resDump, err := httputil.DumpResponse(res, true)
 	if err != nil {
