@@ -98,7 +98,7 @@ func TestScience(t *testing.T) {
 GET / HTTP/1.1
 Host: {{.Host}}
 Accept-Encoding: gzip
-User-Agent: Go-http-client/1.1
+User-Agent: Go 1.1 package http
 
 
 ---  diff   ---
@@ -134,7 +134,7 @@ Server B
 GET / HTTP/1.1
 Host: {{.Host}}
 Accept-Encoding: gzip
-User-Agent: Go-http-client/1.1
+User-Agent: Go 1.1 package http
 
 
 ---  diff   ---
