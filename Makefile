@@ -9,8 +9,7 @@ all: build test
 $(GOLINT):
 	go get github.com/golang/lint/golint
 
-$(PKG): $(GOLINT) $(GODEP)
-	go get $@
+$(PKG): deps $(GOLINT) $(GODEP)
 	go install $@
 	gofmt -w=true $(GOPATH)/src/$@/*.go
 	$(GOLINT) $(GOPATH)/src/$@/*.go
@@ -27,12 +26,15 @@ BUILDS := \
 	build/linux-amd64 \
 	build/darwin-amd64
 
+deps:
+	go get $(PKG)
+
 $(GOPATH)/bin/gox:
 	go get github.com/mitchellh/gox
-build/darwin-amd64: $(GOPATH)/bin/gox
+build/darwin-amd64: deps $(GOPATH)/bin/gox
 	sudo PATH=$$PATH:`go env GOROOT`/bin $(GOPATH)/bin/gox -build-toolchain -os darwin -arch amd64
 	GOARCH=amd64 GOOS=darwin go build -o "$@/$(EXECUTABLE)" $(PKG)
-build/linux-amd64: $(GOPATH)/bin/gox
+build/linux-amd64: deps $(GOPATH)/bin/gox
 	sudo PATH=$$PATH:`go env GOROOT`/bin $(GOPATH)/bin/gox -build-toolchain -os linux -arch amd64
 	GOARCH=amd64 GOOS=linux go build -o "$@/$(EXECUTABLE)" $(PKG)
 
