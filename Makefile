@@ -10,6 +10,7 @@ $(GOLINT):
 	go get github.com/golang/lint/golint
 
 $(PKG): $(GOLINT) $(GODEP)
+	go get $@
 	go install $@
 	gofmt -w=true $(GOPATH)/src/$@/*.go
 	$(GOLINT) $(GOPATH)/src/$@/*.go
