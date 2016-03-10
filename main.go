@@ -15,7 +15,7 @@ import (
 )
 
 // IgnoreHeaders is a list of headers that should be ignored when diffing two responses.
-var IgnoreHeaders = []string{"Date"}
+var IgnoreHeaders = []string{"Date", "Etag", "Content-Length", "Transfer-Encoding"}
 
 // Science is an http.Handler that forwards requests it receives to two places, logging any
 // difference in response.
@@ -131,8 +131,8 @@ func (s Science) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer resExperiment.Body.Close()
 
 	for _, header := range IgnoreHeaders {
-		delete(resControl.Header, header)
-		delete(resExperiment.Header, header)
+		resControl.Header.Del(header)
+		resExperiment.Header.Del(header)
 	}
 
 	diff, err := s.Diff(resControl, resExperiment)
