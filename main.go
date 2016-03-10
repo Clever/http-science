@@ -81,17 +81,17 @@ func JSONDiff(control *http.Response, experiment *http.Response) (string, error)
 // forwardRequest forwards a request to an http server and returns the raw HTTP response.
 // It also removes the Date header from the returned response data so you can diff it against other
 // responses.
-func forwardRequest(r *http.Request, addr string) (*http.Response, error) {
+func forwardRequest(r *http.Request, addr string) (net.Conn, *http.Response, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		return nil, fmt.Errorf("error establishing tcp connection to %s: %s", addr, err)
+		return nil, nil, fmt.Errorf("error establishing tcp connection to %s: %s", addr, err)
 	}
-	defer conn.Close()
 	read := bufio.NewReader(conn)
 	if err = r.WriteProxy(conn); err != nil {
-		return nil, fmt.Errorf("error initializing write proxy to %s: %s", addr, err)
+		return nil, nil, fmt.Errorf("error initializing write proxy to %s: %s", addr, err)
 	}
-	return http.ReadResponse(read, r)
+	resp, err := http.ReadResponse(read, r)
+	return conn, resp, err
 	/*
 		res, err := http.ReadResponse(read, r)
 		if err != nil {
@@ -119,16 +119,20 @@ func (s Science) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// forward requests to control and experiment, diff response
 	var resControl *http.Response
 	var resExperiment *http.Response
-	if resControl, err = forwardRequest(r, s.ControlDial); err != nil {
+	var connControl net.Conn
+	var connExperiment net.Conn
+	if connControl, resControl, err = forwardRequest(r, s.ControlDial); err != nil {
 		log.Printf("error forwarding request to control: %s", err)
 		return
 	}
 	defer resControl.Body.Close()
-	if resExperiment, err = forwardRequest(r, s.ExperimentDial); err != nil {
+	defer connControl.Close()
+	if connExperiment, resExperiment, err = forwardRequest(r, s.ExperimentDial); err != nil {
 		log.Printf("error forwarding request to experiment: %s", err)
 		return
 	}
 	defer resExperiment.Body.Close()
+	defer connExperiment.Close()
 
 	for _, header := range IgnoreHeaders {
 		resControl.Header.Del(header)
