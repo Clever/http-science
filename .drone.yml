@@ -22,6 +22,6 @@ publish:
     - $(git rev-parse --short HEAD)
     username: $$docker_username
     when:
-      branch: master
+      branch: json-diff
 script:
   - make all
