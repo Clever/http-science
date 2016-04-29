@@ -42,6 +42,9 @@ func forwardRequest(r *http.Request, addr string) (string, error) {
 	// matching the bodies and the way the data is sent over the wire doesn't matter, let's ignore these.
 	delete(res.Header, "Transfer-Encoding")
 	delete(res.Header, "Content-Length")
+	delete(res.Header, "X-Request-Id")
+	delete(res.Header, "Etag")
+	delete(res.Header, "Vary")
 
 	resDump, err := httputil.DumpResponse(res, true)
 	if err != nil {
