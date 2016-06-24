@@ -1,100 +1,142 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
+	"sync"
+	"time"
+
+	"github.com/Clever/http-science/config"
+	"github.com/Clever/http-science/email"
+	"github.com/Clever/http-science/getfiles"
+	"github.com/Clever/http-science/gor"
+	"github.com/Clever/http-science/science"
+	"github.com/Clever/http-science/validate"
+	"gopkg.in/Clever/pathio.v3"
 )
 
-// Science is an http.Handler that forwards requests it receives to two places, logging any
-// difference in response.
-type Science struct {
-	ControlDial    string
-	ExperimentDial string
-	DiffLog        *log.Logger
-}
-
-// forwardRequest forwards a request to an http server and returns the raw HTTP response.
-// It also removes the Date header from the returned response data so you can diff it against other
-// responses.
-func forwardRequest(r *http.Request, addr string) (string, error) {
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		return "", fmt.Errorf("error establishing tcp connection to %s: %s", addr, err)
-	}
-	defer conn.Close()
-	read := bufio.NewReader(conn)
-	if err = r.WriteProxy(conn); err != nil {
-		return "", fmt.Errorf("error initializing write proxy to %s: %s", addr, err)
-	}
-	res, err := http.ReadResponse(read, r)
-	if err != nil {
-		return "", fmt.Errorf("error reading response from %s: %s", addr, err)
-	}
-	defer res.Body.Close()
-	delete(res.Header, "Date")
-	// Remove the Transfer-Encoding and Content-Length headers. We've seen some false positives where the control
-	// returns one and the experiment returns the other, but the return the same actual body. Since we're already
-	// matching the bodies and the way the data is sent over the wire doesn't matter, let's ignore these.
-	delete(res.Header, "Transfer-Encoding")
-	delete(res.Header, "Content-Length")
-
-	resDump, err := httputil.DumpResponse(res, true)
-	if err != nil {
-		return "", fmt.Errorf("error dumping response from %s: %s", addr, err)
-	}
-	return string(resDump), nil
-}
-
-func (s Science) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	// save request for potential diff logging
-	reqDump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		log.Printf("error dumping request: %s", err)
-	}
-	req := string(reqDump)
-
-	// forward requests to control and experiment, diff response
-	var resControl string
-	var resExperiment string
-	if resControl, err = forwardRequest(r, s.ControlDial); err != nil {
-		log.Printf("error forwarding request to control: %s", err)
-		return
-	}
-	if resExperiment, err = forwardRequest(r, s.ExperimentDial); err != nil {
-		log.Printf("error forwarding request to experiment: %s", err)
-		return
-	}
-
-	if resControl != resExperiment {
-		s.DiffLog.Printf(`=== diff ===
-%s
----
-%s
----
-%s
-============
-`, req, resControl, resExperiment)
-	}
-
-	// return 200 no matter what
-	fmt.Fprintf(w, "OK")
-}
-
 func main() {
-	for _, env := range []string{"CONTROL", "EXPERIMENT"} {
-		if os.Getenv(env) == "" {
-			log.Fatalf("%s required", env)
+	var err error
+	var handler http.Handler
+
+	payloadBuffer := []byte(os.Args[1])
+	payload := new(config.Payload)
+
+	err = json.Unmarshal(payloadBuffer, payload)
+	config.LogAndExitIfErr(err, "unmarshal-payload-failed", string(payloadBuffer))
+
+	payload, err = validate.Payload(payload)
+	config.LogAndExitIfErr(err, "invalid-payload", payload)
+
+	switch payload.JobType {
+	case "load":
+		handler = setupLoad(payload)
+	case "correctness":
+		handler, err = setupCorrectness(payload)
+	}
+	config.LogAndExitIfErr(err, "setup-failed", payload)
+
+	doScience(handler, payload)
+}
+
+// setupCorrectness returns the handler for a correctness test
+func setupCorrectness(payload *config.Payload) (http.Handler, error) {
+	f, err := ioutil.TempFile(os.TempDir(), "")
+	if err != nil {
+		return nil, err
+	}
+
+	science.Res = science.Results{
+		Reqs:    0,
+		Codes:   map[int]map[int]int{},
+		Mutex:   sync.Mutex{},
+		Diffs:   0,
+		DiffLog: f,
+	}
+	handler := science.CorrectnessTest{
+		ControlURL:    payload.ControlURL,
+		ExperimentURL: payload.ExperimentURL,
+	}
+	return handler, nil
+}
+
+// setupLoad returns the handler for a load test
+func setupLoad(payload *config.Payload) http.Handler {
+	science.Res = science.Results{
+		Reqs:  0,
+		Codes: map[int]map[int]int{},
+		Mutex: sync.Mutex{},
+	}
+	handler := science.LoadTest{
+		URL: payload.LoadURL,
+	}
+	return handler
+}
+
+// doScience sends the stored requests to the provided handler
+func doScience(handler http.Handler, payload *config.Payload) {
+	startTime := time.Now()
+
+	// Start up server to handle the requests coming from gor
+	go func() {
+		err := http.ListenAndServe(":8000", handler)
+		config.LogAndExitIfErr(err, "server-crashed", nil)
+	}()
+
+	// Keep a 10 file buffer for gor
+	files := make(chan string, 10)
+	go func() {
+		err := getfiles.GetFiles(payload, files)
+		config.LogAndExitIfErr(err, "getting-files-failed", nil)
+		// Out of files. Wait until chan empty and then exit
+		waitAndExit(startTime, files, payload)
+	}()
+
+	// Run gor on those files
+	for {
+		err := gor.RunGor(<-files, payload)
+		config.LogAndExitIfErr(err, "gor-failed", nil)
+
+		if science.Res.Reqs >= payload.Reqs {
+			err := logResults(startTime, payload)
+			config.LogAndExitIfErr(err, "logging-results-failed", nil)
+			os.Exit(0)
 		}
 	}
-	log.Fatal(http.ListenAndServe(":80", Science{
-		ControlDial:    os.Getenv("CONTROL"),
-		ExperimentDial: os.Getenv("EXPERIMENT"),
-		DiffLog:        log.New(os.Stdout, "", 0),
-	}))
+}
+
+func waitAndExit(startTime time.Time, files chan string, payload *config.Payload) {
+	for len(files) > 0 {
+		time.Sleep(1 * time.Second)
+	}
+	err := logResults(startTime, payload)
+	config.LogAndExitIfErr(err, "no-files-logging-results-failed", nil)
+	config.LogAndExitIfErr(fmt.Errorf("Ran out of files"), "out-of-files", nil)
+}
+
+func logResults(startTime time.Time, payload *config.Payload) error {
+	log.Printf("%d reqs in %v seconds", science.Res.Reqs, time.Since(startTime))
+	science.Res.Mutex.Lock()
+	log.Printf("Results %#v", science.Res.Codes)
+	science.Res.Mutex.Unlock()
+
+	if payload.JobType == "correctness" {
+		log.Printf("%d Diffs", science.Res.Diffs)
+		diffLog, err := os.Open(science.Res.DiffLog.Name())
+		config.LogAndExitIfErr(err, "open-difflog-failed", nil)
+		err = pathio.WriteReader(payload.DiffLoc, diffLog)
+		config.LogAndExitIfErr(err, "pathio-write-failed", nil)
+	}
+
+	if payload.Email != "" {
+		err := email.SendEmail(payload, time.Since(startTime), science.Res)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

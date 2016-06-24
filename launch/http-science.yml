@@ -1,5 +1,12 @@
 run:
   type: docker
+resources:
+  cpu: 0.5
+  max_mem: 0.2
 env:
-  - CONTROL
-  - EXPERIMENT
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+dependencies:
+- gearman-admin
+- gearmand
+team: eng-apps
