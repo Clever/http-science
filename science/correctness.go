@@ -30,10 +30,12 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if resExperiment, codeExperiment, err = forwardRequest(r, c.ExperimentURL, cleanup); err != nil {
 		resExperiment = "Error forwarding request"
 	}
+
+	Res.Mutex.Lock()
+	defer Res.Mutex.Unlock()
 	Res.Reqs++
 
 	if resControl != resExperiment || codeControl != codeExperiment {
-		Res.Mutex.Lock()
 		if _, ok := Res.Codes[codeExperiment][codeControl]; !ok {
 			if _, ok := Res.Codes[codeExperiment]; !ok {
 				Res.Codes[codeExperiment] = map[int]int{}
@@ -41,7 +43,6 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Res.Codes[codeExperiment][codeControl] = 0
 		}
 		Res.Codes[codeExperiment][codeControl]++
-		Res.Mutex.Unlock()
 
 		Res.Diffs++
 		Res.DiffLog.Write(
