@@ -2,12 +2,19 @@
 
 http-science is a worker that can perform both load and correctness testing. For Clever specific instructions, see [http-science-service](https://github.com/Clever/http-science-service).
 
+
+## Motivation
+
+Changes to existing code often fall into the bucket of having no user-facing effect, e.g. refactors or rewrites. In theory, tests should give you 100% confidence in rolling out changes like this. However, in practice there is often a lot of risk associated with these changes, e.g. the operational risk of the code running in a production environment (performance, etc.), or lack of confidence in the tests.
+
+"[Science](http://zachholman.com/talk/move-fast-break-nothing/)" is a pattern GitHub introduced for deploying changes to code paths that should not change the output of that code path. `http-science` is a tool for doing the same experimentation at the network level.
+
+
 ## Summary
 
 http-science takes traffic captured with [gor](https://github.com/buger/gor) and replays it at the specified URL(s). It recognizes two job types, 'load' and 'correctness'. When running a load test, traffic is replayed at a single URL and the distribution of response codes are logged. When running a correctness test, traffic is replayed simultaneously to a ExperimentURL and a ControlURL. The responses are compared and differences are logged.
 
 http-science expects files to be located at `s3://<s3_bucket>/<file_prefix>/yyyy/mm/dd/hh/filename.gz`. We plan to support local files soon.
-
 
 ## Running
 
@@ -17,7 +24,6 @@ If http-science is running as a gearman worker, you can post through gearman-adm
 `echo $PAYLOAD | http POST <gearman-admin-url>/job/http-science`
 
 The PAYLOAD will depend on which type of test you are running
-
 
 ## Load Testing
 
@@ -30,7 +36,6 @@ Assuming that your target is running at <URL>, start a basic load test with PAYL
   "s3_bucket": "bucketname" // Required
 }
 ```
-
 
 ## Correctness Testing
 
@@ -69,13 +74,6 @@ The following params can be included in the payload for both load and correctnes
 * job_number: If running multiple workers in parallel, give each one a unique number < total_jobs
 * total_jobs: Number of total jobs running in parallel
 * methods: The http methods we will forward
-
-
-## Motivation
-
-Changes to existing code often fall into the bucket of having no user-facing effect, e.g. refactors or rewrites. In theory, tests should give you 100% confidence in rolling out changes like this. However, in practice there is often a lot of risk associated with these changes, e.g. the operational risk of the code running in a production environment (performance, etc.), or lack of confidence in the tests.
-
-"[Science](http://zachholman.com/talk/move-fast-break-nothing/)" is a pattern GitHub introduced for deploying changes to code paths that should not change the output of that code path. `http-science` is a tool for doing the same experimentation at the network level.
 
 ## Vendoring
 
