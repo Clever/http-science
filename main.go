@@ -70,7 +70,8 @@ func setupCorrectness(payload *config.Payload) (http.Handler, error) {
 // setupLoad returns the handler for a load test
 func setupLoad(payload *config.Payload) http.Handler {
 	science.Res = science.Results{
-		Reqs: 0,
+		Reqs:  0,
+		Mutex: &sync.Mutex{},
 	}
 	handler := science.LoadTest{
 		URL: payload.LoadURL,
