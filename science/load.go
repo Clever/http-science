@@ -16,7 +16,5 @@ func (l LoadTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error forwarding request: %s", err)
 		return
 	}
-	Res.Mutex.Lock()
 	Res.Reqs++
-	Res.Mutex.Unlock()
 }

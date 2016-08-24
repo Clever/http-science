@@ -25,10 +25,12 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cleanup := []string{"Date", "Content-Length", "Transfer-Encoding"}
 
 	if resControl, codeControl, err = forwardRequest(r, c.ControlURL, cleanup); err != nil {
-		resControl = "Error forwarding request"
+		resControl = "Error forwarding request Control"
+		codeControl = -1
 	}
 	if resExperiment, codeExperiment, err = forwardRequest(r, c.ExperimentURL, cleanup); err != nil {
-		resExperiment = "Error forwarding request"
+		resExperiment = "Error forwarding request Exp"
+		codeExperiment = -1
 	}
 
 	Res.Mutex.Lock()

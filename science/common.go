@@ -29,7 +29,7 @@ var Res Results
 // to other responses.
 func forwardRequest(r *http.Request, addr string, cleanup []string) (string, int, error) {
 	addr = strings.TrimPrefix(addr, "https://")
-	conn, err := tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true}) // NOPE
+	conn, err := tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true}) // TODO - get tests to work without this
 	if err != nil {
 		return "", 0, fmt.Errorf("error establishing tcp connection to %s: %s", addr, err)
 	}
