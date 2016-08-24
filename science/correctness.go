@@ -13,6 +13,9 @@ type CorrectnessTest struct {
 	ExperimentURL string
 }
 
+var errorForwardingControl = "Error forwarding request Control"
+var errorForwardingExperiment = "Error forwarding request Experiment"
+
 func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// save request for potential diff logging
 	reqDump, err := httputil.DumpRequest(r, true)
@@ -25,11 +28,11 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cleanup := []string{"Date", "Content-Length", "Transfer-Encoding"}
 
 	if resControl, codeControl, err = forwardRequest(r, c.ControlURL, cleanup); err != nil {
-		resControl = "Error forwarding request Control"
+		resControl = errorForwardingControl
 		codeControl = -1
 	}
 	if resExperiment, codeExperiment, err = forwardRequest(r, c.ExperimentURL, cleanup); err != nil {
-		resExperiment = "Error forwarding request Exp"
+		resExperiment = errorForwardingExperiment
 		codeExperiment = -1
 	}
 
