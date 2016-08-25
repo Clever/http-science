@@ -26,7 +26,7 @@ func SendEmail(payload *config.Payload, duration time.Duration, res science.Resu
 		"TIME":       duration.String(),
 	})
 	science.Res.Mutex.Unlock()
-	templateName := "science-correctness"
+	templateName := "http-science-results"
 
 	mandrillClient := mandrill.ClientWithKey(os.Getenv("MANDRILL_KEY"))
 	_, err := mandrillClient.MessagesSendTemplate(message, templateName, map[string]string{})
