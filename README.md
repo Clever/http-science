@@ -1,6 +1,6 @@
 # http-science
 
-http-science is a worker that can perform both load and correctness testing. For Clever specific instructions, see [http-science-service](https://github.com/Clever/http-science-service).
+http-science is a worker that can perform both load and correctness testing. For Clever specific instructions, see [confluence](https://clever.atlassian.net/wiki/display/ENG/Use+http-science).
 
 
 ## Motivation
