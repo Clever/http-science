@@ -9,17 +9,17 @@ EXECUTABLE := $(shell basename $(PKG))
 $(eval $(call golang-version-check,1.6))
 
 BUILDS := \
-	build/linux-amd64 \
-	build/darwin-amd64
+	build/linux-amd64
 
 all: test build
 
-build/darwin-amd64:
-	GOARCH=amd64 GOOS=darwin go build -o "$@/$(EXECUTABLE)" $(PKG)
 build/linux-amd64:
 	GOARCH=amd64 GOOS=linux go build -o "$@/$(EXECUTABLE)" $(PKG)
 
-build: $(BUILDS)
+build: clean $(BUILDS)
+
+clean:
+	-rm -r build
 
 test: $(PKGS)
 $(PKGS): golang-test-all-strict-deps
@@ -27,3 +27,6 @@ $(PKGS): golang-test-all-strict-deps
 
 vendor: golang-godep-vendor-deps
 	$(call golang-godep-vendor,$(PKGS))
+
+run: build
+	gearcmd --name http-science --cmd build/linux-amd64/http-science --parseargs=false --pass-sigterm
