@@ -84,5 +84,4 @@ Please view the [dev-handbook for instructions](https://github.com/Clever/dev-ha
 These features could be added to make this more useful
 
 * Exit once we have a certain number of diffs
-* Log progress as we go (both reqs and diffs)
 * Let gor specify a rate per second rather than a percentage

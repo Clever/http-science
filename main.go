@@ -16,6 +16,7 @@ import (
 	"github.com/Clever/http-science/gor"
 	"github.com/Clever/http-science/science"
 	"github.com/Clever/http-science/validate"
+	"gopkg.in/Clever/kayvee-go.v3/logger"
 	"gopkg.in/Clever/pathio.v3"
 )
 
@@ -102,7 +103,13 @@ func doScience(handler http.Handler, payload *config.Payload) {
 	for {
 		err := gor.RunGor(<-files, payload)
 		config.LogAndExitIfErr(err, "gor-failed", nil)
-
+		config.KV.InfoD("progress", logger.M{
+			"exp_url":     payload.ExperimentURL,
+			"control_url": payload.ControlURL,
+			"load_url":    payload.LoadURL,
+			"reqs":        science.Res.Reqs,
+			"diffs":       science.Res.Diffs,
+		})
 		if science.Res.Reqs >= payload.Reqs {
 			err := logResults(startTime, payload)
 			config.LogAndExitIfErr(err, "logging-results-failed", nil)
