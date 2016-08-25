@@ -12,8 +12,8 @@ import (
 	"github.com/Clever/http-science/config"
 )
 
-// GetFiles adds files to a chan
-func GetFiles(payload *config.Payload, files chan<- string) error {
+// AddFilesToChan adds files from the specified location to a chan
+func AddFilesToChan(payload *config.Payload, files chan<- string) error {
 	base := "%s"
 	if payload.S3Bucket != "" {
 		base = fmt.Sprintf("s3://%s/%%s", payload.S3Bucket)

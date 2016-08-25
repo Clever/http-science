@@ -93,7 +93,7 @@ func doScience(handler http.Handler, payload *config.Payload) {
 	// Keep a 10 file buffer for gor
 	files := make(chan string, 10)
 	go func() {
-		err := getfiles.GetFiles(payload, files)
+		err := getfiles.AddFilesToChan(payload, files)
 		config.LogAndExitIfErr(err, "getting-files-failed", nil)
 		// Out of files. Wait until chan empty and then exit
 		waitAndExit(startTime, files, payload)
