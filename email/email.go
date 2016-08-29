@@ -33,7 +33,7 @@ func SendEmail(payload *config.Payload, duration time.Duration, res science.Resu
 	resp, err := mandrillClient.MessagesSendTemplate(message, templateName, nil)
 	if err != nil {
 		return err
-	} else if resp[0].Status != "Sent" {
+	} else if resp[0].Status != "sent" {
 		return fmt.Errorf("Email not sent, status: %s, reason: %s", resp[0].Status, resp[0].RejectionReason)
 	}
 	return nil
