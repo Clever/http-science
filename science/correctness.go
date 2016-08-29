@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+
+	"github.com/Clever/http-science/config"
+	"gopkg.in/Clever/kayvee-go.v3/logger"
 )
 
 // CorrectnessTest is the interface to run correctness tests with
@@ -28,10 +31,12 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cleanup := []string{"Date", "Content-Length", "Transfer-Encoding"}
 
 	if resControl, codeControl, err = forwardRequest(r, c.ControlURL, cleanup); err != nil {
+		config.KV.ErrorD("forwarding-to-control", logger.M{"err": err.Error()})
 		resControl = errorForwardingControl
 		codeControl = -1
 	}
 	if resExperiment, codeExperiment, err = forwardRequest(r, c.ExperimentURL, cleanup); err != nil {
+		config.KV.ErrorD("forwarding-to-exp", logger.M{"err": err.Error()})
 		resExperiment = errorForwardingExperiment
 		codeExperiment = -1
 	}
