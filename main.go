@@ -135,12 +135,17 @@ func logResults(startTime time.Time, payload *config.Payload) error {
 		log.Printf("Results %#v", science.Res.Codes)
 		science.Res.Mutex.Unlock()
 		log.Printf("%d Diffs", science.Res.Diffs)
-		// write difflog to file
+
+		// Assert difflog is a file - we use the fact that it is a ReadWriter in the tests
 		diffLog, ok := science.Res.DiffLog.(*os.File)
 		if !ok {
 			config.LogAndExitIfErr(fmt.Errorf("Could not assert to be file"), "type-assertion-failed", nil)
 		}
-		diffLog, err := os.Open(diffLog.Name())
+		// Close to prevent data being written during the request
+		err := diffLog.Close()
+		config.LogAndExitIfErr(err, "closing-file-failed", nil)
+		// Open for reading
+		diffLog, err = os.Open(diffLog.Name())
 		config.LogAndExitIfErr(err, "open-difflog-failed", nil)
 		err = pathio.WriteReader(payload.DiffLoc, diffLog)
 		config.LogAndExitIfErr(err, "pathio-write-failed", nil)
