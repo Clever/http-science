@@ -56,7 +56,7 @@ func TestCorrectness(t *testing.T) {
 	expServer := httptest.NewTLSServer(expHandler)
 	defer expServer.Close()
 
-	// Use same server for both control and exp
+	// Use same server for both control and exp - no diff
 	scienceServer := httptest.NewServer(CorrectnessTest{
 		ControlURL:    controlServer.URL,
 		ExperimentURL: controlServer.URL,
@@ -68,7 +68,7 @@ func TestCorrectness(t *testing.T) {
 	assert.Equal(t, 1, Res.Reqs)
 	assert.Equal(t, 0, Res.Diffs)
 
-	// Use different server
+	// Use different server - expected diff
 	scienceServer = httptest.NewServer(CorrectnessTest{
 		ControlURL:    controlServer.URL,
 		ExperimentURL: expServer.URL,
@@ -109,4 +109,19 @@ func TestCorrectness(t *testing.T) {
 	assert.Equal(t, 1, Res.Diffs)
 	assert.Equal(t, map[int]map[int]int{-1: map[int]int{-1: 1}}, Res.Codes)
 	compareDiffLog(t, scienceServer, errorForwardingControl, errorForwardingExperiment)
+
+	// Correctly handles GET requests with bodies
+	scienceServer = httptest.NewServer(CorrectnessTest{
+		ControlURL:    controlServer.URL,
+		ExperimentURL: controlServer.URL,
+	})
+	Res = refreshResults()
+
+	req, err := http.NewRequest("GET", scienceServer.URL, bytes.NewReader([]byte("body")))
+	assert.Nil(t, err)
+	c := http.Client{}
+	_, err = c.Do(req)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, Res.Reqs)
+	assert.Equal(t, 0, Res.Diffs)
 }

@@ -1,7 +1,10 @@
 package science
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -25,17 +28,22 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error dumping request: %s", err)
 	}
-
 	var resControl, resExperiment string
 	var codeControl, codeExperiment int
 	cleanup := []string{"Date", "Content-Length", "Transfer-Encoding"}
 
-	if resControl, codeControl, err = forwardRequest(r, c.ControlURL, cleanup); err != nil {
+	rControl, rExp, err := duplicateRequest(r)
+	if err != nil {
+		config.KV.ErrorD("duplicating-request-failed", logger.M{"err": err.Error()})
+		return
+	}
+
+	if resControl, codeControl, err = forwardRequest(rControl, c.ControlURL, cleanup); err != nil {
 		config.KV.ErrorD("forwarding-to-control", logger.M{"err": err.Error()})
 		resControl = errorForwardingControl
 		codeControl = -1
 	}
-	if resExperiment, codeExperiment, err = forwardRequest(r, c.ExperimentURL, cleanup); err != nil {
+	if resExperiment, codeExperiment, err = forwardRequest(rExp, c.ExperimentURL, cleanup); err != nil {
 		config.KV.ErrorD("forwarding-to-exp", logger.M{"err": err.Error()})
 		resExperiment = errorForwardingExperiment
 		codeExperiment = -1
@@ -59,4 +67,20 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			[]byte(fmt.Sprintf("=== diff ===\n%s\n---\n%s\n---\n%s\n============\n", string(reqDump), resControl, resExperiment)),
 		)
 	}
+}
+
+func duplicateRequest(r *http.Request) (*http.Request, *http.Request, error) {
+	b1, b2 := new(bytes.Buffer), new(bytes.Buffer)
+	w := io.MultiWriter(b1, b2)
+	_, err := io.Copy(w, r.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer r.Body.Close()
+
+	r1, r2 := *r, *r
+	r1.Body = ioutil.NopCloser(b1)
+	r2.Body = ioutil.NopCloser(b2)
+
+	return &r1, &r2, err
 }
