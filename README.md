@@ -37,6 +37,8 @@ Assuming that your target is running at <URL>, start a basic load test with PAYL
 }
 ```
 
+The maximum rate that requests can be replayed appears to be ~100 req/s. If you need more than this, running multiple concurrently is suggested. We have not investigated what the bottleneck of this performance is.
+
 ## Correctness Testing
 
 Assuming that your control is running at <ControlURL>, and your experiment at <ExperimentURL>, start a basic correctness test with PAYLOAD.
