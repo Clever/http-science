@@ -6,7 +6,7 @@ SHELL := /bin/bash
 PKG = github.com/Clever/http-science
 PKGS := $(shell go list ./... | grep -v /vendor)
 EXECUTABLE := $(shell basename $(PKG))
-$(eval $(call golang-version-check,1.6))
+$(eval $(call golang-version-check,1.7))
 
 BUILDS := \
 	build/linux-amd64
