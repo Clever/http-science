@@ -99,6 +99,7 @@ func sliceAreEqual(a, b []interface{}) bool {
 		return false
 	}
 
+	// This fails when there are duplicates in the first list
 	for _, v := range a {
 		areEqual := false
 		for _, bv := range b {

@@ -60,7 +60,7 @@ func forwardRequest(r *http.Request, addr string, cleanup []string) (*forwardedR
 
 	buf, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return &forwardedRequest{}, fmt.Errorf("smt")
+		return &forwardedRequest{}, fmt.Errorf("error reading body from response from %s: %s", addr, err)
 	}
 
 	return &forwardedRequest{
