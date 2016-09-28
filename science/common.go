@@ -50,6 +50,7 @@ func forwardRequest(r *http.Request, addr string, cleanup []string) (*forwardedR
 	if err != nil {
 		return &forwardedRequest{}, fmt.Errorf("error reading response from %s: %s", addr, err)
 	}
+	defer res.Body.Close()
 
 	cleanupHeaders(res, cleanup)
 

@@ -98,13 +98,13 @@ func sliceAreEqual(a, b []interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}
-	used := []int{}
+	usedIndexes := []int{}
 
 	for _, v1 := range a {
 		areEqual := false
 		for i, v2 := range b {
 			// Check that we have't already used this element to match
-			if inList(i, used) {
+			if inList(i, usedIndexes) {
 				continue
 			}
 
@@ -126,7 +126,7 @@ func sliceAreEqual(a, b []interface{}) bool {
 			}
 			// Early exit inner loop once we find a match for this item
 			if areEqual {
-				used = append(used, i)
+				usedIndexes = append(usedIndexes, i)
 				break
 			}
 		}
@@ -138,9 +138,9 @@ func sliceAreEqual(a, b []interface{}) bool {
 	return true
 }
 
-func inList(val int, list []int) bool {
-	for _, v := range list {
-		if v == val {
+func inList(v int, list []int) bool {
+	for _, vList := range list {
+		if v == vList {
 			return true
 		}
 	}
