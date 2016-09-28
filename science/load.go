@@ -11,7 +11,7 @@ type LoadTest struct {
 }
 
 func (l LoadTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, _, err := forwardRequest(r, l.URL, []string{})
+	_, err := forwardRequest(r, l.URL, []string{})
 	if err != nil {
 		log.Printf("Error forwarding request: %s", err)
 		return

@@ -28,10 +28,11 @@ func TestForward(t *testing.T) {
 
 	r, err := http.NewRequest("GET", "https://www.example.com", strings.NewReader(testIn))
 	assert.Nil(t, err)
-	resp, code, err := forwardRequest(r, server.URL, []string{})
+	res, err := forwardRequest(r, server.URL, []string{})
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(resp, testResp))
-	assert.Equal(t, 200, code)
+
+	assert.True(t, strings.Contains(string(res.body), testResp))
+	assert.Equal(t, 200, res.code)
 }
 
 func TestCleanup(t *testing.T) {
@@ -46,9 +47,10 @@ func TestCleanup(t *testing.T) {
 	for _, cleanup := range []string{"Content-Length", "Date"} {
 		r, err := http.NewRequest("GET", "https://www.example.com", nil)
 		assert.Nil(t, err)
-		resp, code, err := forwardRequest(r, server.URL, []string{cleanup})
+		res, err := forwardRequest(r, server.URL, []string{cleanup})
 		assert.Nil(t, err)
-		assert.Equal(t, 200, code)
-		assert.False(t, strings.Contains(resp, cleanup))
+
+		assert.False(t, strings.Contains(string(res.body), cleanup))
+		assert.Equal(t, 200, res.code)
 	}
 }
