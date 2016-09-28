@@ -17,7 +17,6 @@ func TestSimpleDiffs(t *testing.T) {
 
 func TestJSONDiffs(t *testing.T) {
 
-	// These should be the same with either weak or strong comparisons (no OOO arrays)
 	for _, v := range []bool{true, false} {
 		config.WeakCompare = v
 		// Not equal when one or both are not json
@@ -39,9 +38,13 @@ func TestJSONDiffs(t *testing.T) {
 		// Correctly handles nested objects
 		jsonNested1 := []byte(`{"Hel": {"lo": ["Wor", "ld"]}}`)
 		jsonNested2 := []byte(`{"Hel": {"lo": ["Wor", "ld!"]}}`)
-		jsonNestedUnordered1 := []byte(`{"Hel": {"lo": ["Wor", "ld"]}}`)
-		assert.Equal(t, true, isJSONEqual(jsonNested1, jsonNestedUnordered1))
+		assert.Equal(t, true, isJSONEqual(jsonNested1, jsonNested1))
 		assert.Equal(t, false, isJSONEqual(jsonNested1, jsonNested2))
+
+		// We correctly handle duplicates in arrays
+		jsonArrayDup1 := []byte(`{"Hello": ["Wor", "ld!", "ld!"]}}`)
+		jsonArrayDup2 := []byte(`{"Hello": ["Wor", "Wor", "ld!"]}}`)
+		assert.Equal(t, false, isJSONEqual(jsonArrayDup1, jsonArrayDup2))
 
 		// Stress test
 		assert.Equal(t, false, isJSONEqual(jsonComplicated, jsonComplicatedDifferent))
@@ -49,11 +52,6 @@ func TestJSONDiffs(t *testing.T) {
 
 		// OOO arrays and are different with weak vs strong comparison
 		assert.Equal(t, v, isJSONEqual(jsonComplicated, jsonComplicatedUnorderedArray))
-
-		// We correctly handle duplicates in arrays
-		jsonArrayDup1 := []byte(`{"Hello": ["Wor", "ld!", "ld!"]}}`)
-		jsonArrayDup2 := []byte(`{"Hello": ["Wor", "Wor", "ld!"]}}`)
-		assert.Equal(t, false, isJSONEqual(jsonArrayDup1, jsonArrayDup2))
 	}
 
 }
