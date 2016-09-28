@@ -49,6 +49,11 @@ func TestJSONDiffs(t *testing.T) {
 
 		// OOO arrays and are different with weak vs strong comparison
 		assert.Equal(t, v, isJSONEqual(jsonComplicated, jsonComplicatedUnorderedArray))
+
+		// We correctly handle duplicates in arrays
+		jsonArrayDup1 := []byte(`{"Hello": ["Wor", "ld!", "ld!"]}}`)
+		jsonArrayDup2 := []byte(`{"Hello": ["Wor", "Wor", "ld!"]}}`)
+		assert.Equal(t, false, isJSONEqual(jsonArrayDup1, jsonArrayDup2))
 	}
 
 }

@@ -98,30 +98,35 @@ func sliceAreEqual(a, b []interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}
+	used := []int{}
 
-	// This fails when there are duplicates in the first list
-	for _, v := range a {
+	for _, v1 := range a {
 		areEqual := false
-		for _, bv := range b {
+		for i, v2 := range b {
+			// Check that we have't already used this element to match
+			if inList(i, used) {
+				continue
+			}
 
-			switch v := v.(type) {
+			switch v1 := v1.(type) {
 			case []interface{}:
-				bv, ok := bv.([]interface{})
+				v2, ok := v2.([]interface{})
 				if !ok {
 					continue
 				}
-				areEqual = sliceAreEqual(v, bv)
+				areEqual = sliceAreEqual(v1, v2)
 			case map[string]interface{}:
-				bv, ok := bv.(map[string]interface{})
+				v2, ok := v2.(map[string]interface{})
 				if !ok {
 					continue
 				}
-				areEqual = msiAreEqual(v, bv)
+				areEqual = msiAreEqual(v1, v2)
 			default:
-				areEqual = reflect.DeepEqual(v, bv)
+				areEqual = reflect.DeepEqual(v1, v2)
 			}
 			// Early exit inner loop once we find a match for this item
 			if areEqual {
+				used = append(used, i)
 				break
 			}
 		}
@@ -131,4 +136,13 @@ func sliceAreEqual(a, b []interface{}) bool {
 		}
 	}
 	return true
+}
+
+func inList(val int, list []int) bool {
+	for _, v := range list {
+		if v == val {
+			return true
+		}
+	}
+	return false
 }
