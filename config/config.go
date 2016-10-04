@@ -8,6 +8,9 @@ import (
 // KV is this worker's Kayvee logger
 var KV = logger.New("http-science")
 
+// WeakCompare if set to true by the payload allows arrays to be out of order in the json comparison
+var WeakCompare = false
+
 // Payload is the payload specifiying info for a load test
 type Payload struct {
 	// Required
@@ -17,6 +20,7 @@ type Payload struct {
 	ExperimentURL string `json:"experiment_url"`
 	ControlURL    string `json:"control_url"`
 	DiffLoc       string `json:"diff_loc"`
+	WeakCompare   bool   `json:"weak_equal"`
 	// Only Load
 	LoadURL string `json:"load_url"`
 	// Optional

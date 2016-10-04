@@ -94,7 +94,7 @@ func TestCorrectness(t *testing.T) {
 	assert.Equal(t, 1, Res.Reqs)
 	assert.Equal(t, 1, Res.Diffs)
 	assert.Equal(t, map[int]map[int]int{-1: map[int]int{200: 1}}, Res.Codes)
-	compareDiffLog(t, scienceServer, controlRespWithHeaders, errorForwardingExperiment)
+	compareDiffLog(t, scienceServer, controlRespWithHeaders, string(errorForwardingExperiment))
 
 	// Send both to a server that doesn't exist
 	scienceServer = httptest.NewServer(CorrectnessTest{
@@ -108,7 +108,7 @@ func TestCorrectness(t *testing.T) {
 	assert.Equal(t, 1, Res.Reqs)
 	assert.Equal(t, 1, Res.Diffs)
 	assert.Equal(t, map[int]map[int]int{-1: map[int]int{-1: 1}}, Res.Codes)
-	compareDiffLog(t, scienceServer, errorForwardingControl, errorForwardingExperiment)
+	compareDiffLog(t, scienceServer, string(errorForwardingControl), string(errorForwardingExperiment))
 
 	// Correctly handles GET requests with bodies
 	scienceServer = httptest.NewServer(CorrectnessTest{

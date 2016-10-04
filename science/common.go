@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -21,38 +22,52 @@ type Results struct {
 	DiffLog io.ReadWriter
 }
 
+type forwardedRequest struct {
+	dump   string
+	body   []byte
+	header http.Header
+	code   int
+}
+
 // Res represents the outcome of science
 var Res Results
 
 // forwardRequest forwards a request to an address and returns the raw HTTP response.
 // It lets you pass a slice of headers that you want removed to make it easier to compare
 // to other responses.
-func forwardRequest(r *http.Request, addr string, cleanup []string) (string, int, error) {
+func forwardRequest(r *http.Request, addr string, cleanup []string) (*forwardedRequest, error) {
+
 	addr = strings.TrimPrefix(addr, "https://")
 	conn, err := tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true}) // TODO - get tests to work without this
 	if err != nil {
-		return "", 0, fmt.Errorf("error establishing tcp connection to %s: %s", addr, err)
+		return &forwardedRequest{}, fmt.Errorf("error establishing tcp connection to %s: %s", addr, err)
 	}
 	defer conn.Close()
 	if err = r.Write(conn); err != nil {
-		return "", 0, fmt.Errorf("error writing request to %s: %s", addr, err)
+		return &forwardedRequest{}, fmt.Errorf("error writing request to %s: %s", addr, err)
 	}
 	res, err := http.ReadResponse(bufio.NewReader(conn), r)
 	if err != nil {
-		return "", 0, fmt.Errorf("error reading response from %s: %s", addr, err)
+		return &forwardedRequest{}, fmt.Errorf("error reading response from %s: %s", addr, err)
 	}
 	defer res.Body.Close()
-	for _, val := range cleanup {
-		delete(res.Header, val)
-		if val == "Content-Length" {
-			res.ContentLength = 0
-		} else if val == "Transfer-Encoding" {
-			res.TransferEncoding = nil
-		}
-	}
-	resDump, err := httputil.DumpResponse(res, true)
+
+	cleanupHeaders(res, cleanup)
+
+	dump, err := httputil.DumpResponse(res, true)
 	if err != nil {
-		return "", 0, fmt.Errorf("error dumping response from %s: %s", addr, err)
+		return &forwardedRequest{}, fmt.Errorf("error dumping response from %s: %s", addr, err)
 	}
-	return string(resDump), res.StatusCode, nil
+
+	buf, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return &forwardedRequest{}, fmt.Errorf("error reading body from response from %s: %s", addr, err)
+	}
+
+	return &forwardedRequest{
+		dump:   string(dump),
+		body:   buf,
+		code:   res.StatusCode,
+		header: res.Header,
+	}, nil
 }

@@ -4,10 +4,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func refreshLoadResults() Results {
+	return Results{
+		Reqs:  0,
+		Mutex: &sync.Mutex{},
+	}
+}
 
 func TestLoad(t *testing.T) {
 	loadHandler := http.HandlerFunc(
@@ -19,6 +27,7 @@ func TestLoad(t *testing.T) {
 	defer loadServer.Close()
 
 	// Counts request if successful
+	Res = refreshLoadResults()
 	scienceServer := httptest.NewServer(LoadTest{
 		URL: loadServer.URL,
 	})
@@ -28,6 +37,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, 1, Res.Reqs)
 
 	// Doesn't count request if it fails
+	Res = refreshLoadResults()
 	scienceServer = httptest.NewServer(LoadTest{
 		URL: "localhost:not_a_port",
 	})

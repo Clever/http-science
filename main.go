@@ -134,7 +134,7 @@ func logResults(startTime time.Time, payload *config.Payload) error {
 		science.Res.Mutex.Lock()
 		log.Printf("Results %#v", science.Res.Codes)
 		science.Res.Mutex.Unlock()
-		log.Printf("%d Diffs", science.Res.Diffs)
+		log.Printf("%d Diffs using weak compare: %t", science.Res.Diffs, config.WeakCompare)
 
 		// Assert difflog is a file - we use the fact that it is a ReadWriter in the tests
 		diffLog, ok := science.Res.DiffLog.(*os.File)

@@ -81,5 +81,8 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		return nil, fmt.Errorf("email given but no MANDRILL_KEY")
 	}
 
+	if payload.WeakCompare {
+		config.WeakCompare = true
+	}
 	return payload, nil
 }
