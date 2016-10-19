@@ -36,7 +36,7 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// These headers can differ in inconsequential ways so we remove them while forwarding
+	// These headers can differ in inconsequential ways so we remove them from the response while forwarding
 	cleanup := []string{"Date", "Content-Length", "Transfer-Encoding"}
 	control, err := forwardRequest(rControl, c.ControlURL, cleanup)
 	handleForwardErr(control, "control", err)
