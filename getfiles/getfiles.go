@@ -45,6 +45,7 @@ func AddFilesToChan(payload *config.Payload, files chan<- string) error {
 			if err != nil {
 				config.KV.ErrorD("s3-download-failed", logger.M{
 					"s3_filename": file,
+					"err":         err.Error(),
 					// for context:
 					"exp_url":     payload.ExperimentURL,
 					"control_url": payload.ControlURL,
