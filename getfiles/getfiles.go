@@ -3,10 +3,12 @@ package getfiles
 import (
 	"compress/gzip"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
 
+	"gopkg.in/Clever/kayvee-go.v3/logger"
 	"gopkg.in/Clever/pathio.v3"
 
 	"github.com/Clever/http-science/config"
@@ -41,7 +43,15 @@ func AddFilesToChan(payload *config.Payload, files chan<- string) error {
 		if fileType == "file" {
 			localfile, err := downloadFile(file)
 			if err != nil {
-				return fmt.Errorf("s3 download failed: %s", err)
+				config.KV.ErrorD("s3-download-failed", logger.M{
+					"s3_filename": file,
+					"err":         err.Error(),
+					// for context:
+					"exp_url":     payload.ExperimentURL,
+					"control_url": payload.ControlURL,
+					"load_url":    payload.LoadURL,
+				})
+				continue
 			}
 			files <- localfile
 		} else {
@@ -74,7 +84,9 @@ func downloadFile(file string) (string, error) {
 	for {
 		res := make([]byte, chunk)
 		n, err := decompress.Read(res)
-		if err != nil {
+		if err == io.EOF {
+			break
+		} else if err != nil {
 			return "", err
 		}
 		finalRes = append(finalRes, res[:n]...)
