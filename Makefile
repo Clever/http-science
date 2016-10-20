@@ -19,7 +19,7 @@ build/linux-amd64:
 build: clean $(BUILDS)
 
 clean:
-	-rm -r build
+	-rm -rf build
 
 test: $(PKGS)
 $(PKGS): golang-test-all-strict-deps

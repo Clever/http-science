@@ -3,6 +3,7 @@ package getfiles
 import (
 	"compress/gzip"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -74,7 +75,9 @@ func downloadFile(file string) (string, error) {
 	for {
 		res := make([]byte, chunk)
 		n, err := decompress.Read(res)
-		if err != nil {
+		if err == io.EOF {
+			break
+		} else if err != nil {
 			return "", err
 		}
 		finalRes = append(finalRes, res[:n]...)
