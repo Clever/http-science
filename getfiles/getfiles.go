@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"gopkg.in/Clever/kayvee-go.v3/logger"
 	"gopkg.in/Clever/pathio.v3"
 
 	"github.com/Clever/http-science/config"
@@ -42,7 +43,14 @@ func AddFilesToChan(payload *config.Payload, files chan<- string) error {
 		if fileType == "file" {
 			localfile, err := downloadFile(file)
 			if err != nil {
-				return fmt.Errorf("s3 download failed: %s", err)
+				config.KV.ErrorD("s3-download-failed", logger.M{
+					"s3_filename": file,
+					// for context:
+					"exp_url":     payload.ExperimentURL,
+					"control_url": payload.ControlURL,
+					"load_url":    payload.LoadURL,
+				})
+				continue
 			}
 			files <- localfile
 		} else {
