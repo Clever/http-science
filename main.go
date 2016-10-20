@@ -101,14 +101,16 @@ func doScience(handler http.Handler, payload *config.Payload) {
 
 	// Run gor on those files
 	for {
-		err := gor.RunGor(<-files, payload)
+		curFile := <-files
+		err := gor.RunGor(curFile, payload)
 		config.LogAndExitIfErr(err, "gor-failed", nil)
 		config.KV.InfoD("progress", logger.M{
-			"exp_url":     payload.ExperimentURL,
-			"control_url": payload.ControlURL,
-			"load_url":    payload.LoadURL,
-			"reqs":        science.Res.Reqs,
-			"diffs":       science.Res.Diffs,
+			"exp_url":      payload.ExperimentURL,
+			"control_url":  payload.ControlURL,
+			"load_url":     payload.LoadURL,
+			"reqs":         science.Res.Reqs,
+			"diffs":        science.Res.Diffs,
+			"last_gorfile": curFile,
 		})
 		if science.Res.Reqs >= payload.Reqs {
 			err := logResults(startTime, payload)
