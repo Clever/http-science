@@ -90,9 +90,6 @@ func downloadFile(file string) (string, error) {
 			return "", err
 		}
 		finalRes = append(finalRes, res[:n]...)
-		if n != chunk {
-			break
-		}
 	}
 	filename := fmt.Sprintf("%s/%s.txt", os.TempDir(), strings.Split(finalPath(file), ".")[0])
 	pathio.Write(filename, finalRes)
