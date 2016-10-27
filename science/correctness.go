@@ -46,11 +46,13 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	experiment, err := forwardRequest(rExperiment, c.ExperimentURL, cleanup)
 	handleForwardErr(experiment, "experiment", err)
 
+	hasDiff := !codesAreEqual(control.code, experiment.code) || !headersAreEqual(control.header, experiment.header) || !bodiesAreEqual(control.body, experiment.body)
+
 	Res.Mutex.Lock()
 	defer Res.Mutex.Unlock()
 	Res.Reqs++
 
-	if !codesAreEqual(control.code, experiment.code) || !headersAreEqual(control.header, experiment.header) || !bodiesAreEqual(control.body, experiment.body) {
+	if hasDiff {
 		updateCodes(control.code, experiment.code)
 		Res.Diffs++
 		Res.DiffLog.Write(
