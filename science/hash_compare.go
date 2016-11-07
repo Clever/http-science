@@ -73,7 +73,9 @@ func computeHashForObject(jsonVal map[string]interface{}) ([md5.Size]byte, error
 		if err != nil {
 			return [md5.Size]byte{}, err
 		}
-		hashes = append(hashes, keyHash, valHash)
+		keyAndValHash := [][md5.Size]byte{keyHash, valHash}
+		combinedHash := computeHashOfMd5Slice(keyAndValHash)
+		hashes = append(hashes, combinedHash)
 	}
 	sort.Sort(byCompare(hashes))
 	return computeHashOfMd5Slice(hashes), nil
