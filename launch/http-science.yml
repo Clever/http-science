@@ -10,4 +10,4 @@ env:
 dependencies:
 - gearman-admin
 - gearmand
-team: eng-apps
+team: eng-developers
