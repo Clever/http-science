@@ -68,16 +68,16 @@ func AddFilesToChan(payload *config.Payload, files chan<- string) error {
 // downloadFile downloads, unzips and writes to /tmp/filename.txt
 func downloadFile(file string) (string, error) {
 	reader, err := pathio.Reader(file)
+	if err != nil {
+		return "", err
+	}
 	defer reader.Close()
 
-	if err != nil {
-		return "", err
-	}
 	decompress, err := gzip.NewReader(reader)
-	defer decompress.Close()
 	if err != nil {
 		return "", err
 	}
+	defer decompress.Close()
 
 	finalRes := []byte{}
 	chunk := 10000 // read in 10KB chunks
