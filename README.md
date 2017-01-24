@@ -66,7 +66,7 @@ The following params can be included in the payload for both load and correctnes
   "total_jobs": 1, // Default 1. Required if job_number defined
   "methods": "GET,POST,PATCH", // Default GET
   "email": address // Email address to send results to once job is done
-  "disallow_url_regex": url // URLs to ignore
+  "disallow_url_regex": url // URLs to ignore, comma separated if multiple
 }
 ```
 
@@ -77,7 +77,7 @@ The following params can be included in the payload for both load and correctnes
 * job_number: If running multiple workers in parallel, give each one a unique number < total_jobs
 * total_jobs: Number of total jobs running in parallel
 * methods: The http methods we will forward
-* disallow_url_regex: Urls to ignore when analyzing correctness
+* disallow_url_regex: Urls to ignore when analyzing correctness, comma separated if multiple
 
 ## Vendoring
 
