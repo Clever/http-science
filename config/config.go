@@ -1,8 +1,9 @@
 package config
 
 import (
-	"gopkg.in/Clever/kayvee-go.v3/logger"
 	"os"
+
+	"gopkg.in/Clever/kayvee-go.v3/logger"
 )
 
 // KV is this worker's Kayvee logger
@@ -24,14 +25,15 @@ type Payload struct {
 	// Only Load
 	LoadURL string `json:"load_url"`
 	// Optional
-	FilePrefix  string `json:"file_prefix"`
-	Reqs        int    `json:"reqs"`
-	Speed       int    `json:"speed"`
-	JobNumber   int    `json:"job_number"`
-	TotalJobs   int    `json:"total_jobs"`
-	StartBefore string `json:"start_before"`
-	Methods     string `json:"methods"`
-	Email       string `json:"email"`
+	FilePrefix       string `json:"file_prefix"`
+	Reqs             int    `json:"reqs"`
+	Speed            int    `json:"speed"`
+	JobNumber        int    `json:"job_number"`
+	TotalJobs        int    `json:"total_jobs"`
+	StartBefore      string `json:"start_before"`
+	Methods          string `json:"methods"`
+	Email            string `json:"email"`
+	DisallowUrlRegex string `json:"disallow_url_regex"`
 }
 
 // LogAndExitIfErr KV logs and exits with code 1 if there is an error
