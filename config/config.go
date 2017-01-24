@@ -33,7 +33,7 @@ type Payload struct {
 	StartBefore      string `json:"start_before"`
 	Methods          string `json:"methods"`
 	Email            string `json:"email"`
-	DisallowUrlRegex string `json:"disallow_url_regex"`
+	DisallowURLRegex string `json:"disallow_url_regex"`
 }
 
 // LogAndExitIfErr KV logs and exits with code 1 if there is an error
