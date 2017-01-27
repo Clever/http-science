@@ -34,6 +34,7 @@ type Payload struct {
 	Methods          string `json:"methods"`
 	Email            string `json:"email"`
 	DisallowURLRegex string `json:"disallow_url_regex"`
+	AllowURLRegex    string `json:"allow_url_regex"`
 }
 
 // LogAndExitIfErr KV logs and exits with code 1 if there is an error

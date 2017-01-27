@@ -24,6 +24,11 @@ func RunGor(file string, payload *config.Payload) error {
 			args = append(args, []string{"--http-disallow-url", v}...)
 		}
 	}
+	if payload.AllowURLRegex != "" {
+		for _, v := range strings.Split(payload.AllowURLRegex, ",") {
+			args = append(args, []string{"--http-allow-url", v}...)
+		}
+	}
 
 	cmd := exec.Command("gor", args...)
 	stdErr, err := cmd.StderrPipe()
