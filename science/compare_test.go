@@ -56,6 +56,47 @@ func TestJSONDiffs(t *testing.T) {
 
 }
 
+func TestJSONDiffsWithHash(t *testing.T) {
+
+	for _, v := range []bool{true, false} {
+		config.WeakCompare = v
+		// Not equal when one or both are not json
+		not := []byte("not json")
+		jsonSimple2 := []byte(`{"yo": "jt"}`)
+		jsonSimple1 := []byte(`{"yo": "jo"}`)
+		assert.Equal(t, false, isJSONEqualHash(jsonSimple1, not))
+		assert.Equal(t, false, isJSONEqualHash(not, not))
+
+		// Correctly handles simple json
+		assert.Equal(t, true, isJSONEqualHash(jsonSimple1, jsonSimple1))
+		assert.Equal(t, false, isJSONEqualHash(jsonSimple1, jsonSimple2))
+
+		// Correctly handles out of order keys
+		jsonUnorderedKeys1 := []byte(`{"Hel": "lo", "Wor": "ld"}`)
+		jsonUnorderedKeys2 := []byte(`{"Wor": "ld", "Hel": "lo"}`)
+		assert.Equal(t, true, isJSONEqualHash(jsonUnorderedKeys1, jsonUnorderedKeys2))
+
+		// Correctly handles nested objects
+		jsonNested1 := []byte(`{"Hel": {"lo": ["Wor", "ld"]}}`)
+		jsonNested2 := []byte(`{"Hel": {"lo": ["Wor", "ld!"]}}`)
+		assert.Equal(t, true, isJSONEqualHash(jsonNested1, jsonNested1))
+		assert.Equal(t, false, isJSONEqualHash(jsonNested1, jsonNested2))
+
+		// We correctly handle duplicates in arrays
+		jsonArrayDup1 := []byte(`{"Hello": ["Wor", "ld!", "ld!"]}}`)
+		jsonArrayDup2 := []byte(`{"Hello": ["Wor", "Wor", "ld!"]}}`)
+		assert.Equal(t, false, isJSONEqualHash(jsonArrayDup1, jsonArrayDup2))
+
+		// Stress test
+		assert.Equal(t, false, isJSONEqualHash(jsonComplicated, jsonComplicatedDifferent))
+		assert.Equal(t, true, isJSONEqualHash(jsonComplicated, jsonComplicatedUnorderedKey))
+
+		// OOO arrays and are different with weak vs strong comparison
+		assert.Equal(t, v, isJSONEqualHash(jsonComplicated, jsonComplicatedUnorderedArray))
+	}
+
+}
+
 var jsonComplicated = []byte(`
 {
     "id": "0001",

@@ -32,7 +32,7 @@ func bodiesAreEqual(control, experiment []byte) bool {
 	if isSimplyEqual(control, experiment) {
 		return true
 	}
-	return isJSONEqual(control, experiment)
+	return isJSONEqualHash(control, experiment)
 }
 
 // isSimplyEqual returns true if the two strings are equal, false otherwise
