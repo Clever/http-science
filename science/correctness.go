@@ -23,6 +23,16 @@ var errorForwardingControl = []byte("Error forwarding request Control")
 var errorForwardingExperiment = []byte("Error forwarding request Experiment")
 
 func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Bail if too many concurrent requests, else update concurrency if we are using it
+	config.ConcurrencyMutex.Lock()
+	if config.Concurrency == 0 {
+		w.WriteHeader(200)
+		return
+	} else if config.Concurrency > 0 {
+		config.Concurrency--
+	}
+	config.ConcurrencyMutex.Unlock()
+
 	// save request for potential diff logging
 	reqDump, err := httputil.DumpRequest(r, true)
 	if err != nil {
@@ -45,6 +55,13 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleForwardErr(control, "control", err)
 	experiment, err := forwardRequest(rExperiment, c.ExperimentURL, cleanup)
 	handleForwardErr(experiment, "experiment", err)
+
+	// Update concurrency if we are using it
+	config.ConcurrencyMutex.Lock()
+	if config.Concurrency != -1 {
+		config.Concurrency++
+	}
+	config.ConcurrencyMutex.Unlock()
 
 	hasDiff := !codesAreEqual(control.code, experiment.code) || !headersAreEqual(control.header, experiment.header) || !bodiesAreEqual(control.body, experiment.body)
 
