@@ -54,7 +54,7 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 	// Set default speed
 	if payload.Concurrency != 0 {
 		payload.Speed = 10000 // set really high speed, we will control with concurrency
-		config.Concurrency = payload.Concurrency
+		config.Concurrency.Value = payload.Concurrency
 	} else if payload.Speed == 0 {
 		payload.Speed = 100
 	}

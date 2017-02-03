@@ -13,11 +13,14 @@ var KV = logger.New("http-science")
 // WeakCompare if set to true by the payload allows arrays to be out of order in the json comparison
 var WeakCompare = false
 
-// Concurrency is the max number of concurrent requests. Ignored if < 0
-var Concurrency = -1
-
-// ConcurrencyMutex lets us access concurrency safely
-var ConcurrencyMutex = &sync.Mutex{}
+// Concurrency is the max number of concurrent requests and a mutex. Ignored if value < 0
+var Concurrency = struct {
+	Value int
+	Mutex *sync.Mutex
+}{
+	Value: -1,
+	Mutex: &sync.Mutex{},
+}
 
 // Payload is the payload specifiying info for a load test
 type Payload struct {
