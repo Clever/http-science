@@ -1,7 +1,7 @@
 include golang.mk
 .DEFAULT_GOAL := test # override default goal set in library makefile
 
-.PHONY: all build test vendor $(PKGS)
+.PHONY: all build test vendor $(PKGS) install_deps
 SHELL := /bin/bash
 PKG = github.com/Clever/http-science
 PKGS := $(shell go list ./... | grep -v /vendor)
@@ -27,6 +27,12 @@ $(PKGS): golang-test-all-strict-deps
 
 vendor: golang-godep-vendor-deps
 	$(call golang-godep-vendor,$(PKGS))
+
+$(GOPATH)/bin/glide:
+	@go get github.com/Masterminds/glide
+
+install_deps: $(GOPATH)/bin/glide
+	@$(GOPATH)/bin/glide install -v
 
 run: build
 	gearcmd --name http-science --cmd build/linux-amd64/http-science --parseargs=false --pass-sigterm
