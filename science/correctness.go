@@ -22,7 +22,33 @@ type CorrectnessTest struct {
 var errorForwardingControl = []byte("Error forwarding request Control")
 var errorForwardingExperiment = []byte("Error forwarding request Experiment")
 
+func incrementConcurrency() {
+	config.Concurrency.Mutex.Lock()
+	defer config.Concurrency.Mutex.Unlock()
+	if config.Concurrency.Value != -1 {
+		config.Concurrency.Value++
+	}
+}
+
+func decrementConcurrency() bool {
+	config.Concurrency.Mutex.Lock()
+	defer config.Concurrency.Mutex.Unlock()
+	if config.Concurrency.Value == 0 {
+		return false
+	} else if config.Concurrency.Value > 0 {
+		config.Concurrency.Value--
+	}
+	return true
+}
+
 func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Bail if too many concurrent requests, else update concurrency if we are using it
+	if !decrementConcurrency() {
+		w.WriteHeader(200)
+		return
+	}
+	defer incrementConcurrency()
+
 	// save request for potential diff logging
 	reqDump, err := httputil.DumpRequest(r, true)
 	if err != nil {

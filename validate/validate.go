@@ -17,6 +17,9 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		if payload.LoadURL == "" {
 			return nil, fmt.Errorf("Payload must contain 'load_url' if job_type is load")
 		}
+		if payload.Speed != 0 && payload.Concurrency != 0 {
+			return nil, fmt.Errorf("Payload can't contain both speed an concurrency")
+		}
 	case "correctness":
 		if payload.ExperimentURL == "" || payload.ControlURL == "" {
 			return nil, fmt.Errorf("Payload must contain 'experiment_url' and 'control_url' if job_type is correctness")
@@ -24,6 +27,10 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		if payload.DiffLoc == "" {
 			return nil, fmt.Errorf("Payload must contain 'diff_loc' if job_type is correctness")
 		}
+		if payload.Speed != 0 {
+			return nil, fmt.Errorf("Payload can't contain speed if job_type is correctness. Use concurrency")
+		}
+
 	default:
 		return nil, fmt.Errorf("Payload.job_type must be 'load' or 'correctness', got %s", payload.JobType)
 	}
@@ -44,10 +51,14 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		return nil, fmt.Errorf("file_prefix should not start or end with slash if used with 's3_bucket'")
 	}
 
-	// Set speed and reqs to defaults if not specified
-	if payload.Speed == 0 {
+	// Set default speed
+	if payload.Concurrency != 0 {
+		payload.Speed = 10000 // set really high speed, we will control with concurrency
+		config.Concurrency.Value = payload.Concurrency
+	} else if payload.Speed == 0 {
 		payload.Speed = 100
 	}
+	// Set default reqs
 	if payload.Reqs == 0 {
 		payload.Reqs = 1000
 	}
@@ -81,8 +92,6 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		return nil, fmt.Errorf("email given but no MANDRILL_KEY")
 	}
 
-	if payload.WeakCompare {
-		config.WeakCompare = true
-	}
+	config.WeakCompare = payload.WeakCompare
 	return payload, nil
 }

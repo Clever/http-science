@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"sync"
 
 	"gopkg.in/Clever/kayvee-go.v3/logger"
 )
@@ -11,6 +12,15 @@ var KV = logger.New("http-science")
 
 // WeakCompare if set to true by the payload allows arrays to be out of order in the json comparison
 var WeakCompare = false
+
+// Concurrency is the max number of concurrent requests and a mutex. Ignored if value < 0
+var Concurrency = struct {
+	Value int
+	Mutex *sync.Mutex
+}{
+	Value: -1,
+	Mutex: &sync.Mutex{},
+}
 
 // Payload is the payload specifiying info for a load test
 type Payload struct {
@@ -24,10 +34,11 @@ type Payload struct {
 	WeakCompare   bool   `json:"weak_equal"`
 	// Only Load
 	LoadURL string `json:"load_url"`
+	Speed   int    `json:"speed"`
 	// Optional
+	Concurrency      int    `json:"concurrency"`
 	FilePrefix       string `json:"file_prefix"`
 	Reqs             int    `json:"reqs"`
-	Speed            int    `json:"speed"`
 	JobNumber        int    `json:"job_number"`
 	TotalJobs        int    `json:"total_jobs"`
 	StartBefore      string `json:"start_before"`
