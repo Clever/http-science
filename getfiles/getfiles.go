@@ -1,9 +1,11 @@
 package getfiles
 
 import (
+	"bufio"
 	"compress/gzip"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -73,26 +75,30 @@ func downloadFile(file string) (string, error) {
 	}
 	defer reader.Close()
 
-	decompress, err := gzip.NewReader(reader)
+	bReader := bufio.NewReader(reader)
+	peek, err := bReader.Peek(2)
 	if err != nil {
 		return "", err
 	}
-	defer decompress.Close()
 
-	finalRes := []byte{}
-	chunk := 10000 // read in 10KB chunks
-	for {
-		res := make([]byte, chunk)
-		n, err := decompress.Read(res)
-		if err == io.EOF {
-			break
-		} else if err != nil {
+	data := []byte{}
+	var outReader io.Reader = bReader
+	// Gunzip if gzip file: http://www.zlib.org/rfc-gzip.html
+	if peek[0] == 31 && peek[1] == 139 {
+		decompress, err := gzip.NewReader(bReader)
+		if err != nil {
 			return "", err
 		}
-		finalRes = append(finalRes, res[:n]...)
+		defer decompress.Close()
+		outReader = decompress
 	}
+	data, err = ioutil.ReadAll(outReader) // These files should be only a few MBs
+	if err != nil {
+		return "", err
+	}
+
 	filename := fmt.Sprintf("%s/%s.txt", os.TempDir(), strings.Split(finalPath(file), ".")[0])
-	pathio.Write(filename, finalRes)
+	pathio.Write(filename, data)
 	return filename, nil
 }
 
