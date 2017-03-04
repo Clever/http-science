@@ -22,16 +22,32 @@ type CorrectnessTest struct {
 var errorForwardingControl = []byte("Error forwarding request Control")
 var errorForwardingExperiment = []byte("Error forwarding request Experiment")
 
-func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Bail if too many concurrent requests, else update concurrency if we are using it
+func incrementConcurrency() {
 	config.Concurrency.Mutex.Lock()
+	defer config.Concurrency.Mutex.Unlock()
+	if config.Concurrency.Value != -1 {
+		config.Concurrency.Value++
+	}
+}
+
+func decrementConcurrency() bool {
+	config.Concurrency.Mutex.Lock()
+	defer config.Concurrency.Mutex.Unlock()
 	if config.Concurrency.Value == 0 {
-		w.WriteHeader(200)
-		return
+		return false
 	} else if config.Concurrency.Value > 0 {
 		config.Concurrency.Value--
 	}
-	config.Concurrency.Mutex.Unlock()
+	return true
+}
+
+func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Bail if too many concurrent requests, else update concurrency if we are using it
+	if !decrementConcurrency() {
+		w.WriteHeader(200)
+		return
+	}
+	defer incrementConcurrency()
 
 	// save request for potential diff logging
 	reqDump, err := httputil.DumpRequest(r, true)
@@ -55,13 +71,6 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleForwardErr(control, "control", err)
 	experiment, err := forwardRequest(rExperiment, c.ExperimentURL, cleanup)
 	handleForwardErr(experiment, "experiment", err)
-
-	// Update concurrency if we are using it
-	config.Concurrency.Mutex.Lock()
-	if config.Concurrency.Value != -1 {
-		config.Concurrency.Value++
-	}
-	config.Concurrency.Mutex.Unlock()
 
 	hasDiff := !codesAreEqual(control.code, experiment.code) || !headersAreEqual(control.header, experiment.header) || !bodiesAreEqual(control.body, experiment.body)
 
