@@ -93,5 +93,6 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 	}
 
 	config.WeakCompare = payload.WeakCompare
+	config.IgnoredHeaders = payload.IgnoredHeaders
 	return payload, nil
 }

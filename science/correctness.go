@@ -22,6 +22,13 @@ type CorrectnessTest struct {
 var errorForwardingControl = []byte("Error forwarding request Control")
 var errorForwardingExperiment = []byte("Error forwarding request Experiment")
 
+// These headers can differ in inconsequential ways so we remove them from the response before comparing
+// the can be appended to with the payload
+var defaultIgnoredHeaders = []string{
+	"Date", "Content-Length", "Transfer-Encoding", "X-Request-Id", "Etag",
+	"Ot-Tracer-Sampled", "Ot-Tracer-Spanid", "Ot-Tracer-Traceid",
+}
+
 func incrementConcurrency() {
 	config.Concurrency.Mutex.Lock()
 	defer config.Concurrency.Mutex.Unlock()
@@ -62,14 +69,10 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// These headers can differ in inconsequential ways so we remove them from the response while forwarding
-	cleanup := []string{
-		"Date", "Content-Length", "Transfer-Encoding", "X-Request-Id", "Etag",
-		"Ot-Tracer-Sampled", "Ot-Tracer-Spanid", "Ot-Tracer-Traceid",
-	}
-	control, err := forwardRequest(rControl, c.ControlURL, cleanup)
+	ignoredHeaders := append(defaultIgnoredHeaders, config.IgnoredHeaders...)
+	control, err := forwardRequest(rControl, c.ControlURL, ignoredHeaders)
 	handleForwardErr(control, "control", err)
-	experiment, err := forwardRequest(rExperiment, c.ExperimentURL, cleanup)
+	experiment, err := forwardRequest(rExperiment, c.ExperimentURL, ignoredHeaders)
 	handleForwardErr(experiment, "experiment", err)
 
 	hasDiff := !codesAreEqual(control.code, experiment.code) || !headersAreEqual(control.header, experiment.header) || !bodiesAreEqual(control.body, experiment.body)

@@ -13,6 +13,9 @@ var KV = logger.New("http-science")
 // WeakCompare if set to true by the payload allows arrays to be out of order in the json comparison
 var WeakCompare = false
 
+// IgnoredHeaders are the headers we ignore diffs on
+var IgnoredHeaders []string
+
 // Concurrency is the max number of concurrent requests and a mutex. Ignored if value < 0
 var Concurrency = struct {
 	Value int
@@ -28,10 +31,11 @@ type Payload struct {
 	JobType  string `json:"job_type"`
 	S3Bucket string `json:"s3_bucket"`
 	// Only Correctness
-	ExperimentURL string `json:"experiment_url"`
-	ControlURL    string `json:"control_url"`
-	DiffLoc       string `json:"diff_loc"`
-	WeakCompare   bool   `json:"weak_equal"`
+	ExperimentURL  string   `json:"experiment_url"`
+	ControlURL     string   `json:"control_url"`
+	DiffLoc        string   `json:"diff_loc"`
+	WeakCompare    bool     `json:"weak_equal"`
+	IgnoredHeaders []string `json:"ignored_headers"`
 	// Only Load
 	LoadURL string `json:"load_url"`
 	Speed   int    `json:"speed"`
