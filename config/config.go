@@ -13,6 +13,9 @@ var KV = logger.New("http-science")
 // WeakCompare if set to true by the payload allows arrays to be out of order in the json comparison
 var WeakCompare = false
 
+// IgnoredHeaders are the headers we ignore diffs on
+var IgnoredHeaders []string
+
 // Concurrency is the max number of concurrent requests and a mutex. Ignored if value < 0
 var Concurrency = struct {
 	Value int
