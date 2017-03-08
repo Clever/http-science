@@ -91,6 +91,7 @@ func (c CorrectnessTest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func duplicateRequest(r *http.Request) (*http.Request, *http.Request, error) {
+	r.Header.Del("If-None-Match")
 	b1, b2 := new(bytes.Buffer), new(bytes.Buffer)
 	w := io.MultiWriter(b1, b2)
 	_, err := io.Copy(w, r.Body)
