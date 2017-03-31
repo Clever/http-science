@@ -2,3 +2,4 @@ http-science
 *~
 build/
 *.txt
+vendor

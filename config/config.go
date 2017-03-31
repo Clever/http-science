@@ -1,7 +1,6 @@
 package config
 
 import (
-	"os"
 	"sync"
 
 	"gopkg.in/Clever/kayvee-go.v3/logger"
@@ -36,6 +35,7 @@ type Payload struct {
 	DiffLoc        string   `json:"diff_loc"`
 	WeakCompare    bool     `json:"weak_equal"`
 	IgnoredHeaders []string `json:"ignored_headers"`
+	PutbackURL     string   `json:"putback_url"`
 	// Only Load
 	LoadURL string `json:"load_url"`
 	Speed   int    `json:"speed"`
@@ -52,13 +52,7 @@ type Payload struct {
 	AllowURLRegex    string `json:"allow_url_regex"`
 }
 
-// LogAndExitIfErr KV logs and exits with code 1 if there is an error
-func LogAndExitIfErr(err error, title string, extra interface{}) {
-	if err != nil {
-		KV.ErrorD(title, logger.M{
-			"payload": extra,
-			"error":   err.Error(),
-		})
-		os.Exit(1)
-	}
+// PutbackResponse is the data that gets put to the PutbackURL on completion
+type PutbackResponse struct {
+	Diffs int `json:"diffs"`
 }
