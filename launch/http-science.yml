@@ -1,7 +1,7 @@
 run:
   type: docker
 resources:
-  cpu: 0.5
+  cpu: 0.05
   max_mem: 0.2
 env:
 - AWS_ACCESS_KEY_ID
