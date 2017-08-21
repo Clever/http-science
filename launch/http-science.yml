@@ -2,7 +2,8 @@ run:
   type: docker
 resources:
   cpu: 0.0  # no CPU to improve resource usage (https://clever.atlassian.net/browse/INFRA-2120)
-  max_mem: 0.2
+  soft_mem_limit: 0.125
+  max_mem: 0.5
 env:
 - AWS_ACCESS_KEY_ID
 - AWS_SECRET_ACCESS_KEY
