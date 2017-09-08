@@ -5,7 +5,7 @@ RUN apt-get -y update && apt-get install -y curl wget flex bison make build-esse
   curl -L https://github.com/Clever/gor/releases/download/v0.13.6/gor_0.13.6_x64.tar.gz | tar xvz -C /usr/local/bin/ && chmod +x /usr/local/bin/gor && \
   wget http://www.tcpdump.org/release/libpcap-1.7.4.tar.gz && tar xzf libpcap-1.7.4.tar.gz && cd libpcap-1.7.4 && \
     ./configure && make install && cd .. && rm -rf libpcap-1.7.4 && \
-  curl -L https://github.com/Clever/gearcmd/releases/download/0.8.6/gearcmd-v0.8.6-linux-amd64.tar.gz | \
+  curl -L https://github.com/Clever/gearcmd/releases/download/0.8.7/gearcmd-v0.8.7-linux-amd64.tar.gz | \
     tar xz -C /usr/local/bin --strip-components 1
 
 COPY build/linux-amd64/http-science /usr/local/bin/http-science
