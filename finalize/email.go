@@ -1,4 +1,4 @@
-package email
+package finalize
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 	"github.com/keighl/mandrill"
 )
 
-// SendEmail sends email to the address in the payload with the results
-func SendEmail(payload *config.Payload, duration time.Duration, res science.Results) error {
+// sendEmail sends email to the address in the payload with the results
+func sendEmail(payload *config.Payload, duration time.Duration, res science.Results) error {
 	message := &mandrill.Message{}
 	message.AddRecipient(payload.Email, "", "to")
 
