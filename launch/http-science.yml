@@ -11,4 +11,4 @@ env:
 dependencies:
 - gearman-admin
 - gearmand
-team: eng-developers
+team: eng-secure-sync
