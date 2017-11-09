@@ -6,7 +6,7 @@ SHELL := /bin/bash
 PKG = github.com/Clever/http-science
 PKGS := $(shell go list ./... | grep -v /vendor)
 EXECUTABLE := $(shell basename $(PKG))
-$(eval $(call golang-version-check,1.8))
+$(eval $(call golang-version-check,1.9))
 
 BUILDS := \
 	build/linux-amd64
@@ -25,14 +25,12 @@ test: $(PKGS)
 $(PKGS): golang-test-all-strict-deps
 	$(call golang-test-all-strict,$@)
 
-vendor: golang-godep-vendor-deps
-	$(call golang-godep-vendor,$(PKGS))
 
-$(GOPATH)/bin/glide:
-	@go get github.com/Masterminds/glide
 
-install_deps: $(GOPATH)/bin/glide
-	@$(GOPATH)/bin/glide install -v
 
 run: build
 	gearcmd --name http-science --cmd build/linux-amd64/http-science --parseargs=false --pass-sigterm
+
+
+install_deps: golang-dep-vendor-deps
+	$(call golang-dep-vendor)
