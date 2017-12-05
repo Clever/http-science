@@ -28,6 +28,8 @@ func SendEmail(payload *config.Payload, duration time.Duration, res science.Resu
 	science.Res.Mutex.Unlock()
 	templateName := "http-science-results"
 
+	message.Tags = []string{"template-" + templateName}
+
 	mandrillClient := mandrill.ClientWithKey(os.Getenv("MANDRILL_KEY"))
 
 	resp, err := mandrillClient.MessagesSendTemplate(message, templateName, nil)
