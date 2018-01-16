@@ -13,5 +13,4 @@ COPY build/linux-amd64/http-science /usr/local/bin/http-science
 CMD ["gearcmd", \
     "--name", "http-science", \
     "--cmd", "/usr/local/bin/http-science", \
-    "--parseargs=false", \
-    "pass-sigterm"]
+    "--parseargs=false" ]
