@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/Clever/http-science"
-  packages = ["config","email","getfiles","gor","science","validate"]
-  revision = "78d49eb9f3d6d3c6b69cbb778be10520b7681918"
-
-[[projects]]
   name = "github.com/aws/aws-sdk-go"
   packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","private/protocol","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/restxml","private/protocol/xml/xmlutil","private/waiter","service/s3","service/sts"]
   revision = "4590e9b51cd6698144a025a75608fa7a90752d5d"
@@ -59,6 +53,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "57f888730b194a140b6bdb09c3a5b583f766828a1b37d48994c67472e83ce8bf"
+  inputs-digest = "eb345b8c1ceba2dbf44eae165764a48b1ce35c2bdeda02c1553c94c924936bf4"
   solver-name = "gps-cdcl"
   solver-version = 1
