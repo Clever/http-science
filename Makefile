@@ -1,3 +1,4 @@
+include sfncli.mk
 include golang.mk
 .DEFAULT_GOAL := test # override default goal set in library makefile
 
@@ -6,6 +7,7 @@ SHELL := /bin/bash
 PKG = github.com/Clever/http-science
 PKGS := $(shell go list ./... | grep -v /vendor)
 EXECUTABLE := $(shell basename $(PKG))
+SFNCLI_VERSION := latest
 $(eval $(call golang-version-check,1.9))
 
 BUILDS := \
@@ -16,7 +18,7 @@ all: test build
 build/linux-amd64:
 	GOARCH=amd64 GOOS=linux go build -o "$@/$(EXECUTABLE)" $(PKG)
 
-build: clean $(BUILDS)
+build: clean $(BUILDS) bin/sfncli
 
 clean:
 	-rm -rf build
