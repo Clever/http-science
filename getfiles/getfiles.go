@@ -18,17 +18,9 @@ import (
 
 // AddFilesToChan adds files from the specified location to a chan
 func AddFilesToChan(payload *config.Payload, files chan<- string) error {
-	base := "%s"
-	if payload.S3Bucket != "" {
-		base = fmt.Sprintf("s3://%s/%%s", payload.S3Bucket)
-	} else {
-		return fmt.Errorf("Currently only supports s3 files")
-	}
-
-	baseWithPrefix := fmt.Sprintf(base, payload.FilePrefix)
-	if payload.FilePrefix != "" {
-		baseWithPrefix += "/"
-	}
+	base := "s3://firehose-prod/%s"
+	filePrefix := fmt.Sprintf("replay-testing/%s/", payload.ServiceName)
+	baseWithPrefix := fmt.Sprintf(base, filePrefix)
 
 	// Starting with the baseWithPrefix, build a stack of directories to explore and
 	// files to download.

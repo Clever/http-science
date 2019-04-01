@@ -28,20 +28,22 @@ var Concurrency = struct {
 // Payload is the payload specifiying info for a load test
 type Payload struct {
 	// Required
-	JobType  string `json:"job_type"`
-	S3Bucket string `json:"s3_bucket"`
+	JobType     string `json:"job_type"`
+	ServiceName string `json:"service_name"`
 	// Only Correctness
-	ExperimentURL  string   `json:"experiment_url"`
-	ControlURL     string   `json:"control_url"`
+	ExperimentEnv  string   `json:"experiment_env"`
+	ControlEnv     string   `json:"control_env"`
+	ExperimentURL  string   // initialized in validate.go
+	ControlURL     string   // initialized in validate.go
 	DiffLoc        string   `json:"diff_loc"`
 	WeakCompare    bool     `json:"weak_equal"`
 	IgnoredHeaders []string `json:"ignored_headers"`
 	// Only Load
-	LoadURL string `json:"load_url"`
+	LoadEnv string `json:"load_env"`
+	LoadURL string // initialized in validate.go
 	Speed   int    `json:"speed"`
 	// Optional
 	Concurrency      int    `json:"concurrency"`
-	FilePrefix       string `json:"file_prefix"`
 	Reqs             int    `json:"reqs"`
 	JobNumber        int    `json:"job_number"`
 	TotalJobs        int    `json:"total_jobs"`
