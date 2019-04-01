@@ -32,8 +32,8 @@ Assuming that your target is running at <URL>, start a basic load test with PAYL
 ```
 {
   "job_type": "load", // Required
-  "load_url": "<URL>", // Required
-  "s3_bucket": "bucketname" // Required
+  "service_name": "<SERVICE_NAME>" // Required
+  "load_env": "<ENV>", // Required
 }
 ```
 
@@ -46,9 +46,9 @@ Assuming that your control is running at <ControlURL>, and your experiment at <E
 ```
 {
   "job_type": "correctness", // Required
-  "control_url": "<ControlURL>", // Required
-  "experiment_url": "<ExperimentURL>", // Required
-  "s3_bucket": "bucketname" // Required
+  "service_name": "<SERVICE_NAME>" // Required
+  "control_env": "<ENV>", // Required
+  "experiment_env": "<ENV>", // Required
   "diff_loc": "s3://bucket/prefix/file" // Required, can be s3 or local path
 }
 ```
@@ -58,7 +58,6 @@ Assuming that your control is running at <ControlURL>, and your experiment at <E
 The following params can be included in the payload for both load and correctness testing to give more control over the test:
 ```
 {
-  "file_prefix": "this/service", // Default ""
   "start_before": "2016/05/31:23", // Default 9999/99/99:99
   "speed": 300, // Default 100
   "reqs": 1000, // Default 1000
