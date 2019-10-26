@@ -27,7 +27,7 @@ The PAYLOAD will depend on which type of test you are running
 
 ## Load Testing
 
-Assuming that your target is running at <URL>, start a basic load test with PAYLOAD
+Assuming that your target is running at `<URL>`, start a basic load test with PAYLOAD
 
 ```
 {
@@ -41,7 +41,7 @@ The maximum rate that requests can be replayed appears to be ~100 req/s. If you 
 
 ## Correctness Testing
 
-Assuming that your control is running at <ControlURL>, and your experiment at <ExperimentURL>, start a basic correctness test with PAYLOAD.
+Assuming that your control is running at `<ControlURL>`, and your experiment at `<ExperimentURL>`, start a basic correctness test with PAYLOAD.
 
 ```
 {
