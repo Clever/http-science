@@ -25,6 +25,10 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		}
 		payload.LoadURL = fmt.Sprintf("https://%s--%s.int.clever.com:443", payload.LoadEnv, payload.ServiceName)
 	case "correctness":
+		port := "443"
+		if payload.Port != "" {
+			port = payload.Port
+		}
 		if payload.ExperimentEnv == "" || payload.ControlEnv == "" {
 			return nil, fmt.Errorf("Payload must contain 'experiment_env' and 'control_env' if job_type is correctness")
 		}
@@ -34,8 +38,8 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		if payload.Speed != 0 {
 			return nil, fmt.Errorf("Payload can't contain speed if job_type is correctness. Use concurrency")
 		}
-		payload.ControlURL = fmt.Sprintf("https://%s--%s.int.clever.com:443", payload.ControlEnv, payload.ServiceName)
-		payload.ExperimentURL = fmt.Sprintf("https://%s--%s.int.clever.com:443", payload.ExperimentEnv, payload.ServiceName)
+		payload.ControlURL = fmt.Sprintf("https://%s--%s.int.clever.com:%s", payload.ControlEnv, payload.ServiceName, port)
+		payload.ExperimentURL = fmt.Sprintf("https://%s--%s.int.clever.com:%s", payload.ExperimentEnv, payload.ServiceName, port)
 	default:
 		return nil, fmt.Errorf("Payload.job_type must be 'load' or 'correctness', got %s", payload.JobType)
 	}
