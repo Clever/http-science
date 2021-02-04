@@ -23,7 +23,12 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		if payload.Speed != 0 && payload.Concurrency != 0 {
 			return nil, fmt.Errorf("Payload can't contain both speed an concurrency")
 		}
-		payload.LoadURL = fmt.Sprintf("https://%s--%s.int.clever.com:443", payload.LoadEnv, payload.ServiceName)
+		podID := ""
+		if payload.PodID != "" {
+			podID = fmt.Sprintf("--%s", payload.PodID)
+		}
+
+		payload.LoadURL = fmt.Sprintf("https://%s--%s%s.int.clever.com:443", payload.LoadEnv, payload.ServiceName, podID)
 	case "correctness":
 		port := "443"
 		if payload.Port != "" {
@@ -38,8 +43,12 @@ func Payload(payload *config.Payload) (*config.Payload, error) {
 		if payload.Speed != 0 {
 			return nil, fmt.Errorf("Payload can't contain speed if job_type is correctness. Use concurrency")
 		}
-		payload.ControlURL = fmt.Sprintf("https://%s--%s.int.clever.com:%s", payload.ControlEnv, payload.ServiceName, port)
-		payload.ExperimentURL = fmt.Sprintf("https://%s--%s.int.clever.com:%s", payload.ExperimentEnv, payload.ServiceName, port)
+		podID := ""
+		if payload.PodID != "" {
+			podID = fmt.Sprintf("--%s", payload.PodID)
+		}
+		payload.ControlURL = fmt.Sprintf("https://%s--%s%s.int.clever.com:%s", payload.ControlEnv, payload.ServiceName, podID, port)
+		payload.ExperimentURL = fmt.Sprintf("https://%s--%s%s.int.clever.com:%s", payload.ExperimentEnv, payload.ServiceName, podID, port)
 	default:
 		return nil, fmt.Errorf("Payload.job_type must be 'load' or 'correctness', got %s", payload.JobType)
 	}
