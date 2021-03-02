@@ -23,7 +23,3 @@ aws:
     - Workflows
 pod_config:
   group: us-west-2
-  dev:
-    migrationState: podOnly
-  prod:
-    migrationState: podOnly
