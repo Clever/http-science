@@ -34,5 +34,5 @@ run: build
 	gearcmd --name http-science --cmd build/linux-amd64/http-science --parseargs=false --pass-sigterm
 
 
-install_deps: golang-dep-vendor-deps
-	$(call golang-dep-vendor)
+install_deps:
+	go mod vendor
