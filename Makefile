@@ -8,7 +8,7 @@ PKG = github.com/Clever/http-science
 PKGS := $(shell go list ./... | grep -v /vendor)
 EXECUTABLE := $(shell basename $(PKG))
 SFNCLI_VERSION := latest
-$(eval $(call golang-version-check,1.13))
+$(eval $(call golang-version-check,1.16))
 
 BUILDS := \
 	build/linux-amd64
