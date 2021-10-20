@@ -5,7 +5,7 @@ RUN apt-get -y update && \
     apt-get install -y curl wget flex bison make build-essential && \
     curl -L https://github.com/Clever/gor/releases/download/v0.13.6/gor_0.13.6_x64.tar.gz | tar xvz -C /usr/local/bin/ && \
     chmod +x /usr/local/bin/gor && \
-    wget http://www.tcpdump.org/release/libpcap-1.7.4.tar.gz && \
+    wget https://www.tcpdump.org/release/libpcap-1.7.4.tar.gz && \
     tar xzf libpcap-1.7.4.tar.gz && \
     cd libpcap-1.7.4 && \
     ./configure && \
