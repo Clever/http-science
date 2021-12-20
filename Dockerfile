@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:bullseye
 
 # Can't just apt-get install libpcap because this is the recommended version and ubuntu only had 1.5.3-2
 RUN apt-get -y update && \
