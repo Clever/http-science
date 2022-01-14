@@ -7,7 +7,7 @@ env:
 - MANDRILL_KEY
 dependencies:
 - gearman-admin
-team: eng-secure-sync
+team: eng-sharing-apis
 aws:
   s3:
     read:
