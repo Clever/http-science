@@ -13,7 +13,11 @@ jobs:
         command: cd $HOME && git clone --depth 1 -v https://github.com/Clever/ci-scripts.git && cd ci-scripts && git show --oneline -s
         name: Clone ci-scripts
     - checkout
-    - setup_remote_docker
+    - setup_remote_docker:
+        # Something with debian:bullseye images in the current default CircleCI
+        # docker verison of 17.09.0-ce don't mix well.
+        # I found this fix in https://github.com/docker-library/php/issues/1192
+        version: 20.10.11
     - run:
         command: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
         name: Set up CircleCI artifacts directories
