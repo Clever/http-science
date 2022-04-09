@@ -1,6 +1,6 @@
 module github.com/Clever/http-science
 
-go 1.13
+go 1.16
 
 require (
 	github.com/aws/aws-sdk-go v1.6.19-0.20170203071509-4590e9b51cd6 // indirect

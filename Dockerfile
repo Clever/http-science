@@ -1,6 +1,7 @@
-FROM debian:stretch
+FROM debian:bullseye
 
-# Can't just apt-get install libpcap because this is the recommended version and ubuntu only had 1.5.3-2
+# Pin the version of libpcap by downloading the release directly
+# (rather than installing the version from apt-get which may not be compatible)
 RUN apt-get -y update && \
     apt-get install -y curl wget flex bison make build-essential && \
     curl -L https://github.com/Clever/gor/releases/download/v0.13.6/gor_0.13.6_x64.tar.gz | tar xvz -C /usr/local/bin/ && \
