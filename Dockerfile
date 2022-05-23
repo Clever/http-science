@@ -18,4 +18,4 @@ RUN apt-get -y update && \
 COPY bin/sfncli /usr/bin/sfncli
 COPY build/linux-amd64/http-science /usr/local/bin/http-science
 
-CMD ["/usr/bin/sfncli", "--cmd", "/usr/local/bin/http-science", "--activityname", "${_DEPLOY_ENV}--${_APP_NAME}", "--region", "us-west-2", "--cloudwatchregion", "us-west-2", "--workername", "MAGIC_ECS_TASK_ID"]
+CMD ["/usr/bin/sfncli", "--cmd", "/usr/local/bin/http-science", "--activityname", "${_DEPLOY_ENV}--${_APP_NAME}", "--region", "us-west-2", "--cloudwatchregion", "${_POD_REGION}", "--workername", "MAGIC_ECS_TASK_ID"]
