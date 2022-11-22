@@ -27,3 +27,6 @@ deploy_config:
   autoDeployEnvs:
   - clever-dev
   - production
+mesh_config:
+  dev:
+    state: mesh_only
