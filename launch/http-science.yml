@@ -4,29 +4,29 @@ resources:
   cpu: 0.25
   max_mem: 0.5
 env:
-- MANDRILL_KEY
+  - MANDRILL_KEY
 dependencies:
-- gearman-admin
+  - gearman-admin
 team: eng-api
 aws:
   s3:
     read:
-    - firehose-prod
-    - firehose-staging
-    - replay-testing
+      - firehose-prod
+      - firehose-staging
+      - replay-testing
     write:
-    - replay-testing
+      - replay-testing
   custom: true
   managed:
     clever:
-    - Workflows
+      - Workflows
 pod_config:
-  group: us-west-1
+  group: us-west-2
 deploy_config:
   canaryInProd: false
   autoDeployEnvs:
-  - clever-dev
-  - production
+    - clever-dev
+    - production
 mesh_config:
   dev:
     state: mesh_only
