@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bookworm-slim
 
 # Pin the version of libpcap by downloading the release directly
 # (rather than installing the version from apt-get which may not be compatible)
