@@ -16,6 +16,16 @@ http-science takes traffic captured with [gor](https://github.com/buger/gor) and
 
 http-science expects files to be located at `s3://<s3_bucket>/<file_prefix>/yyyy/mm/dd/hh/filename.gz`. We plan to support local files soon.
 
+
+## Compiling
+1. Ensure that you have properly setup your `$GOPATH`
+2. While in your `$GOPATH`, clone the repository & `cd` into it
+3. Run `make install_deps`
+4. Run `bin/deps ensure` (`bin/deps status` to view the status of project dependencies)
+5. Run `make && make build`
+6. Run `go build`
+
+
 ## Running
 
 `./http-science $PAYLOAD`
