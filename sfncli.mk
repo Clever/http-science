@@ -6,7 +6,11 @@ SYSTEM := $(shell uname -a | cut -d" " -f1 | tr '[:upper:]' '[:lower:]')
 SFNCLI_INSTALLED := $(shell [[ -e "bin/sfncli" ]] && bin/sfncli --version)
 # AUTH_HEADER is used to help avoid github ratelimiting
 AUTH_HEADER = $(shell [[ ! -z "${GITHUB_API_TOKEN}" ]] && echo "Authorization: token $(GITHUB_API_TOKEN)")
-SFNCLI_LATEST = $(shell curl -s https://api.github.com/repos/Clever/sfncli/releases/latest  | grep tag_name | cut -d\" -f4)
+SFNCLI_LATEST = $(shell \
+	curl --retry 5 -f -s --header "$(AUTH_HEADER)" \
+		https://api.github.com/repos/Clever/sfncli/releases/latest | \
+	grep tag_name | \
+	cut -d\" -f4)
 
 .PHONY: bin/sfncli sfncli-update-makefile ensure-sfncli-version-set ensure-curl-installed
 
