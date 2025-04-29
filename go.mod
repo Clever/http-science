@@ -1,6 +1,6 @@
 module github.com/Clever/http-science
 
-go 1.21
+go 1.24
 
 require (
 	github.com/keighl/mandrill v0.0.0-20160526121027-6a59523fcf7d
