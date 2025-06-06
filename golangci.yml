@@ -1,0 +1,52 @@
+version: "2"
+
+linters:
+  exclusions:
+    # lax mode has a more loose definition of a generated file. Not all
+    # of Clever's code gen files adhere to the strict definition which
+    # is very specific.
+    generated: lax
+    paths:
+      # We dont label all of our generated files with comments.
+      - gen-go
+      - launch.go
+
+formatters:
+  enable:
+    - gofumpt
+    - gofmt
+    - goimports
+  exclusions:
+    # lax mode has a more loose definition of a generated file. Not all
+    # of Clever's code gen files adhere to the strict definition which
+    # is very specific.
+    generated: lax
+    paths:
+      # We dont label all of our generated files with comments.
+      - gen-go
+      - launch.go
+  settings:
+    gofmt:
+      # This is enabled by default in gofumpt. We are largely using this
+      # linter for the rewrite interface to any utility
+      simplify: false
+      rewrite-rules:
+        - pattern: 'interface{}'
+          replacement: 'any'
+    goimports:
+      # Group Clever packages into their own section.
+      local-prefixes:
+        - github.com/Clever
+
+issues:
+  # Only raise linter errors if the errors are on lines changed in the PR.
+  new: true
+  # A value of 0 disables the max visible issues so that we can see all of
+  # them at once
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+run:
+  # Read only means that go tool chain commands will fail if the go.mod requires changes.
+  modules-download-mode: readonly
+  allow-parallel-runners: true
